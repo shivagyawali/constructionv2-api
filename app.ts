@@ -9,6 +9,7 @@ import cors from "cors";
 import { AppDataSource } from "./src/config/db";
 import routes from './src/api/routes'
 import { ApiError } from "./src/api/helpers/Utils/ApiError";
+import { defaultConfig } from "./src/config/defaultConfig";
 dotenv.config();
 
 const app: Express = express();
@@ -52,11 +53,13 @@ async function startServer(): Promise<void> {
    next: NextFunction
  ) => {
    const statusCode = err.statusCode || 500;
+   console.log(err.message);
+   
    res.status(statusCode).json({
-     message: err.userMessage || "An unexpected error occurred",
+     message: err.message || "An unexpected error occurred",
      status: statusCode,
-     details: err.details || null,
-     stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
+     details: err.details || err.userMessage,
+     stack:defaultConfig.environment === "dev" ? err.stack : undefined,
    });
  };
 

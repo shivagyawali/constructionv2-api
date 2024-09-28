@@ -5,7 +5,6 @@ import { defaultConfig } from "./defaultConfig";
 const path = require("path");
 dotenv.config();
 const syncDB = true;
-
 export const AppDataSource = new DataSource({
   type: "mysql",
   host: defaultConfig.mysql.host,

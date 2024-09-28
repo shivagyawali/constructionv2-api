@@ -27,6 +27,6 @@ export class Project extends BaseEntity {
   @JoinColumn({ name: "userId" })
   user: User;
 
-  @Column()
+  @Column({nullable:true})
   userId: string;
 }

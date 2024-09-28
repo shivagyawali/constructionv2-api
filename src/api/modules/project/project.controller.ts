@@ -5,8 +5,8 @@ import { asyncHandler } from "../../helpers/Utils/AsyncHandler";
 const projectService = new ProjectService();
 
 export class ProjectController {
-  static createProject = asyncHandler(async (req: Request, res: Response) => {
-    const project = await projectService.createProject(req.body);
+  static createProject = asyncHandler(async (req: any, res: Response) => {
+    const project = await projectService.createProject(req);
     return res.status(201).json(project);
   });
 
