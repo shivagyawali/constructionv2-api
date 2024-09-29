@@ -11,6 +11,7 @@ const asyncHandler = (requestHandler: RequestHandler) => {
         new ApiError(
           error.message || "Internal Server Error",
           error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+          error.errorCode || StatusCodes.INTERNAL_SERVER_ERROR,
           error.details || "An unexpected error occurred"
         )
       );

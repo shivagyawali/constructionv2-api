@@ -51,8 +51,7 @@ export class User extends BaseEntity {
   @ManyToMany(() => Task, (task) => task.users)
   tasks: Task[];
 
-  @OneToMany(() => Project, (project) => project.user)
-  projects: Project[];
+
 
   async fetchPermissionsByRole() {
     const permissionRepo =AppDataSource.getRepository(Permission);

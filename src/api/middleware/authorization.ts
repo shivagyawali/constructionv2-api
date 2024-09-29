@@ -24,6 +24,7 @@ export const isAuthorized = asyncHandler(
     const userRepo = AppDataSource.getRepository(User);
     const user: any = await userRepo.findOne({
       where: { id: decodedToken.userId },
+      relations: ["company"],
     });
 
     if (!user) {
@@ -33,13 +34,12 @@ export const isAuthorized = asyncHandler(
        "UNAUTHORIZED",
        "The token you provided is not valid. Please log in again."
      );
-  
     }
-
     req.user = {
       id: user.id,
       name: user.name,
       role: user.role,
+      companyId: user?.company?.id,
       permissions: await user.fetchPermissionsByRole(),
     };
 
@@ -66,8 +66,8 @@ export const authorize = (resource: string, action: string) => {
     return sendErrorResponse(
       res,
       StatusCodes.FORBIDDEN,
-      "FORBIDDEN",
-      `Access denied. You don't have permission to ${action} ${resource}.`
+      `Access denied. You don't have permission to ${action} ${resource}.`,
+       "FORBIDDEN",
     );
   };
 };

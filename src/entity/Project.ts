@@ -9,6 +9,7 @@ import {
 import { User } from "./User";
 import { Task } from "./Task";
 import { BaseEntity } from "./BaseEntity";
+import { Company } from "./Company";
 
 @Entity({
   name: "projects",
@@ -22,11 +23,8 @@ export class Project extends BaseEntity {
 
   @OneToMany(() => Task, (task) => task.project)
   tasks: Task[];
-
-  @ManyToOne(() => User, (user) => user.projects)
-  @JoinColumn({ name: "userId" })
-  user: User;
-
-  @Column({nullable:true})
-  userId: string;
+  
+  @ManyToOne(() => Company, (company) => company.projects)
+  @JoinColumn({ name: "companyId" }) 
+  company: Company;
 }

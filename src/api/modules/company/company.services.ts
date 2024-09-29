@@ -4,15 +4,16 @@ import { validate, ValidationError } from "class-validator";
 import { Company } from "../../../entity/Company";
 import { User } from "../../../entity/User";
 import { ApiError } from "../../helpers/Utils/ApiError";
+import { UserRole } from "../../enum";
 
 export class CompanyService {
   static async registerCompany(
-    res: unknown,
-    companyName: string,
-    companyEmail: string,
-    name: string,
-    email: string,
-    password: string
+    res:any,
+    name:any,
+    companyName:any,
+    companyEmail:any,
+    email:any,
+    password:any
   ) {
     const companyRepo = AppDataSource.getRepository(Company);
     const userRepo = AppDataSource.getRepository(User);
@@ -45,8 +46,8 @@ export class CompanyService {
       email,
       name,
       password: hashedPassword,
-      role: "admin",
-      company, // Associate the user with the newly created company
+      role: UserRole.CLIENT,
+      company,
     });
 
     // Validate the user entity

@@ -36,12 +36,17 @@ export class AuthService {
         }
       });
 
+    const expiresIn = "1h";
     const token = jwt.sign(
       { userId: user.id, role: user.role },
-     defaultConfig.secret
+      defaultConfig.secret,
+      { expiresIn }
     );
+    const expirationTime = Math.floor(Date.now() / 1000) + 60 * 60;
+
      return {
        token,
+       expiresAt: new Date(expirationTime * 1000).toISOString(),
        user: {
          name: user.name,
          email: user.email,

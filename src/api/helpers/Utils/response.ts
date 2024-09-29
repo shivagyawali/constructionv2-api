@@ -19,7 +19,7 @@ export const sendSuccessResponse = (
 export const sendErrorResponse = (
   res: Response,
   statusCode: number,
-  errorCode: string,
+  errorCode: any,
   message: string
 ) => {
   const errorResponse = new ApiError(message, statusCode, errorCode);
