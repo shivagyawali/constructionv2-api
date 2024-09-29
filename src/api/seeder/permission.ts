@@ -1,14 +1,15 @@
 import { AppDataSource } from "../../config/db";
 import { Permission } from "../../entity/Permission";
+import { UserRole } from "../enum";
 
 export const seedPermissions = async () => {
   const repo = AppDataSource.getRepository(Permission);
   const permissionData = {
-    name: "Project",
+    name: "companies",
     resource: "create,read,update,delete,view,edit,list",
     rolePermissions: JSON.stringify([
       {
-        role: "root",
+        role: UserRole.ROOT,
         permissions: [
           "create",
           "delete",
@@ -21,25 +22,19 @@ export const seedPermissions = async () => {
         ],
       },
       {
-        role: "company",
+        role: UserRole.CLIENT,
         permissions: [
-          "create",
-          "delete",
-          "edit",
-          "list",
           "read",
-          "view",
-          "update",
+          "view"
         ],
       },
       {
-        role: "admin",
-        permissions: ["list", "read", "view", "edit", "update", "create"],
+        role: UserRole.ADMIN,
+        permissions: ["read", "view",],
       },
-
       {
-        role: "worker",
-        permissions: ["read", "list", "view"],
+        role: UserRole.WORKER,
+        permissions: ["read"],
       },
     ]),
   };

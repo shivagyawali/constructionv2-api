@@ -5,30 +5,36 @@ import { UserRole } from "../../enum";
 import { paginate } from "../../helpers/Utils/paginate";
 import { constructWhereConditions } from "../../helpers/Utils/constructWhereConditions";
 
-
 export class ProjectService {
   private projectRepository = AppDataSource.getRepository(Project);
   private userRepo = AppDataSource.getRepository(User);
-  async createProject(data: any) {
-    const { name, description } = data.body;
+  async createProject({
+    body: { name, description },
+    user: { id: userId },
+  }: any) {
     const user = await this.userRepo.findOne({
-      where: { id: data?.user?.id },
+      where: { id: userId },
       relations: ["company"],
     });
-    const newProject = new Project();
-    newProject.name = name;
-    newProject.description = description || null;
-    if (user && user.company !== null) {
-      newProject.company = user?.company;
+    if (
+      user?.role !== UserRole.ROOT &&
+      user?.role !== UserRole.CLIENT &&
+      !user?.company
+    ) {
+      throw new Error("You are not yet registered with any company yet");
     }
-    const result = await this.projectRepository.save(newProject);
-    // return {
-    //   id: result.id,
-    //   name: result.name,
-    //   description: result.description,
 
-    // };
-    return result;
+    const newProject = await this.projectRepository.save({
+      name,
+      description: description || null,
+      company: user?.company || null,
+    });
+
+    return {
+      id: newProject.id,
+      name: newProject.name,
+      description: newProject.description,
+    };
   }
 
   getAllProjects = async (

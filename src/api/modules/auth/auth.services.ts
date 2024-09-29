@@ -12,8 +12,8 @@ export class AuthService {
   static async login(email: string, password: string) {
     const userRepo = AppDataSource.getRepository(User);
     const permissionRepo = AppDataSource.getRepository(Permission);
-    //await createUser();
-   // await seedPermissions();
+    await createUser();
+    //await seedPermissions();
     const user = await userRepo.findOne({
       where: { email },
       relations: ["company"],

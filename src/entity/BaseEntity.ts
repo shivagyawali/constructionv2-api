@@ -15,14 +15,10 @@ export abstract class BaseEntity extends TypeORMBaseEntity {
 
   @PrimaryGeneratedColumn("uuid")
   id: string;
-  
-  @CreateDateColumn({ type: "timestamp", default: () => "CURRENT_TIMESTAMP" })
+
+  @CreateDateColumn({ type: "timestamp", nullable: true })
   createdAt: Date;
 
-  @UpdateDateColumn({
-    type: "timestamp",
-    default: () => "CURRENT_TIMESTAMP",
-    onUpdate: "CURRENT_TIMESTAMP",
-  })
+  @UpdateDateColumn({ type: "timestamp", nullable: true })
   updatedAt: Date;
 }
