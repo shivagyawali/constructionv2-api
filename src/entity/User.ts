@@ -6,6 +6,7 @@ import { Project } from "./Project";
 import { BaseEntity } from "./BaseEntity";
 import { AppDataSource } from "../config/db";
 import { Permission } from "./Permission";
+import { UserRole } from "../api/enum";
 @Entity({
   name: "users",
 })
@@ -32,17 +33,16 @@ export class User extends BaseEntity {
   @Column()
   password: string;
 
-  @IsString()
-  @Column({ default: "worker" })
-  role: string;
+  @Column({ default: UserRole.WORKER })
+  role: UserRole;
 
-  @Column({ default: 0 })
+  @Column({ default: false })
   isVerified: boolean;
 
-  @Column({ default: 0 })
+  @Column({ default: false })
   isActive: boolean;
 
-  @Column({ default: 0 })
+  @Column({ default: false })
   isPasswordChangeRequired: boolean;
 
   @ManyToOne(() => Company, (company) => company.users)

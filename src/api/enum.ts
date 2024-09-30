@@ -4,3 +4,12 @@ export enum UserRole {
   CLIENT = "client",
   WORKER = "worker",
 }
+
+
+export enum CompanyStatus {
+  PENDING_VERIFICATION = "pending_verification",
+  VERIFID = "verified",
+  ACTIVE = "active",
+  INACTIVE = "inactive",
+}
+
