@@ -9,9 +9,8 @@ const asyncHandler = (requestHandler: RequestHandler) => {
     Promise.resolve(requestHandler(req, res, next)).catch((error: any) => {
       next(
         new ApiError(
-          error.message || "Internal Server Error",
           error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
-          error.errorCode || StatusCodes.INTERNAL_SERVER_ERROR,
+          error.message || "Internal Server Error",
           error.details || "An unexpected error occurred"
         )
       );

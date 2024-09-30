@@ -46,22 +46,22 @@ async function startServer(): Promise<void> {
   app.use(morgan("tiny"));
   // app.use("/api-docs", swaggerUi.serve);
   // app.get("/api-docs", swaggerUi.setup(swaggerDocument));
- const errorHandler = (
-   err: ApiError,
-   req: Request,
-   res: Response,
-   next: NextFunction
- ) => {
-   const statusCode = err.statusCode || 500;
-   console.log(err.message);
-   
-   res.status(statusCode).json({
-     message: err.message || "An unexpected error occurred",
-     status: statusCode,
-     details: err.details || err.userMessage,
-     stack:defaultConfig.environment === "dev" ? err.stack : undefined,
-   });
- };
+
+const errorHandler = (
+  err: ApiError,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const statusCode = err.statusCode || 500;
+
+  res.status(statusCode).json({
+    message: err.message || "An unexpected error occurred",
+    status: statusCode,
+    details: err.details || "No additional information",
+    stack: defaultConfig.environment === "dev" ? err.stack : undefined,
+  });
+};
 
   app.use("/api", routes);
 

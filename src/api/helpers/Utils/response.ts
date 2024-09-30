@@ -22,7 +22,7 @@ export const sendErrorResponse = (
   errorCode: any,
   message: string
 ) => {
-  const errorResponse = new ApiError(message, statusCode, errorCode);
+  const errorResponse = new ApiError(statusCode, message, errorCode);
   res.status(statusCode).json({
     error: errorResponse,
   });

@@ -22,18 +22,16 @@ export class ProjectController {
       page,
       filters
     );
-
-    return sendSuccessResponse(res, "Data Fetched Successfully", 200, projects);
+    return sendSuccessResponse(res, projects.count ===0 ? "No data found":"Data Fetched Successfully", 200, projects);
   });
 
-  static updateProject = asyncHandler(async (req: Request, res: Response) => {
-    const project = await projectService.updateProject(req.params.id, req.body);
-    if (!project) return res.status(404).json({ message: "Project not found" });
+  static updateProject = asyncHandler(async (req: any, res: Response) => {
+    const project = await projectService.updateProject(req.params.id, req);
     return sendSuccessResponse(res, "Project Updated", 200, project);
   });
 
-  static deleteProject = asyncHandler(async (req: Request, res: Response) => {
-    await projectService.deleteProject(req.params.id);
-    return res.status(204).send();
+  static deleteProject = asyncHandler(async (req: any, res: Response) => {
+     const project = await projectService.deleteProject(req.params.id,req?.user);
+    return sendSuccessResponse(res, "Project Deleted successfully", 200, project);
   });
 }

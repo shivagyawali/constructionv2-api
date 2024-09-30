@@ -4,6 +4,13 @@ import { User } from "../../../entity/User";
 import { UserRole } from "../../enum";
 import { paginate } from "../../helpers/Utils/paginate";
 import { constructWhereConditions } from "../../helpers/Utils/constructWhereConditions";
+import {
+  ApiError,
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from "../../helpers/Utils/ApiError";
+import { StatusCodes } from "http-status-codes";
 
 export class ProjectService {
   private projectRepository = AppDataSource.getRepository(Project);
@@ -21,9 +28,10 @@ export class ProjectService {
       user?.role !== UserRole.CLIENT &&
       !user?.company
     ) {
-      throw new Error("You are not yet registered with any company yet");
+      throw new BadRequestError(
+        "You are not yet registered with any company yet"
+      );
     }
-
     const newProject = await this.projectRepository.save({
       name,
       description: description || null,
@@ -56,21 +64,34 @@ export class ProjectService {
       take: 10,
       order: { createdAt: "DESC" },
     });
-
     return { ...paginate(page, count), results, count };
   };
 
-  async updateProject(
-    id: string,
-    data: Partial<Project>
-  ): Promise<Project | null> {
-    const project = await this.projectRepository.findOne({ where: { id: id } });
-    if (!project) return null;
-    Object.assign(project, data);
+  async updateProject(id: string, data: any): Promise<Project | null> {
+    const { role, companyId } = data.user;
+    const where = {
+      id,
+      ...(role === UserRole.CLIENT && { company: { id: companyId } }),
+    };
+    const project: any = await this.projectRepository.findOne({ where });
+    if (!project && role !== UserRole.ROOT) {
+      throw new NotFoundError("Project not found.");
+    }
+    Object.assign(project, data.body);
     return await this.projectRepository.save(project);
   }
 
-  async deleteProject(id: string): Promise<void> {
-    await this.projectRepository.delete(id);
+  async deleteProject(id: string, user: any): Promise<void> {
+    const where = {
+      id,
+      ...(user.role === UserRole.CLIENT && { company: { id: user.companyId } }),
+    };
+    const project = await this.projectRepository.findOne({ where });
+    if (!project && user.role !== UserRole.ROOT) {
+      throw new NotFoundError("Project not found.");
+    }
+    if (project) {
+      await this.projectRepository.remove(project);
+    }
   }
 }

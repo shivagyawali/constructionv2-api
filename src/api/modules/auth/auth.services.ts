@@ -6,20 +6,21 @@ import { defaultConfig } from "../../../config/defaultConfig";
 import { createUser } from "../../seeder/createUser";
 import { seedPermissions } from "../../seeder/permission";
 import { Permission } from "../../../entity/Permission";
+import { InvalidCredentialsError } from "../../helpers/Utils/ApiError";
 
 export class AuthService {
 
   static async login(email: string, password: string) {
     const userRepo = AppDataSource.getRepository(User);
     const permissionRepo = AppDataSource.getRepository(Permission);
-    await createUser();
+    //await createUser();
     //await seedPermissions();
     const user = await userRepo.findOne({
       where: { email },
       relations: ["company"],
     });
     if (!user || !(await bcrypt.compare(password, user.password))) {
-      throw new Error("Invalid credentials");
+     throw new InvalidCredentialsError("Email and password doesn't match")
     }
       const allPermissions = await permissionRepo.find();
       const permissionsByResource:any = {};

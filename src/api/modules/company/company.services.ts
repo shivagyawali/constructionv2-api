@@ -17,10 +17,7 @@ export class CompanyService {
   ) {
     const companyRepo = AppDataSource.getRepository(Company);
     const userRepo = AppDataSource.getRepository(User);
-
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    // Create the company entity
     const company = companyRepo.create({
       name: companyName,
       email: companyEmail,
@@ -31,33 +28,28 @@ export class CompanyService {
     if (companyErrors.length > 0) {
       const formattedErrors = this.formatValidationErrors(companyErrors);
       throw new ApiError(
-        "Company Validation Failed",
         400,
-        "Invalid company details provided",
-        formattedErrors
+        "Company Validation Failed",
+        JSON.stringify(formattedErrors)
       );
     }
-
-    // Save the company to the database
-    await companyRepo.save(company);
-
-    // Create the user entity
+    const co = await companyRepo.save(company);
     const user = userRepo.create({
       email,
       name,
       password: hashedPassword,
       role: UserRole.CLIENT,
       company,
+      companyId: co?.id,
     });
 
     // Validate the user entity
     const userErrors = await validate(user);
     if (userErrors.length > 0) {
       throw new ApiError(
-        "User Validation Failed",
         400,
-        "Invalid user details provided",
-        this.formatValidationErrors(userErrors)
+        "User Validation Failed",
+        JSON.stringify(userErrors)
       );
     }
 

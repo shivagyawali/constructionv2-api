@@ -48,14 +48,17 @@ export class User extends BaseEntity {
   @ManyToOne(() => Company, (company) => company.users)
   company: Company;
 
+  @Column({ nullable: true })
+  companyId: string;
+
   @ManyToMany(() => Task, (task) => task.users)
   tasks: Task[];
   async fetchPermissionsByRole() {
-    const permissionRepo =AppDataSource.getRepository(Permission);
+    const permissionRepo = AppDataSource.getRepository(Permission);
     const allPermissions = await permissionRepo.find();
     const permissionsByResource: any = {};
     allPermissions.forEach((permission) => {
-      const rolePermissions = JSON.parse(permission.rolePermissions); 
+      const rolePermissions = JSON.parse(permission.rolePermissions);
       const userRolePermissions = rolePermissions.find(
         (rolePerm: any) => rolePerm.role === this.role
       );
