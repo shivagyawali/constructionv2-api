@@ -34,4 +34,8 @@ export class ProjectController {
      const project = await projectService.deleteProject(req.params.id,req?.user);
     return sendSuccessResponse(res, "Project Deleted successfully", 200, project);
   });
+  static getOneProject = asyncHandler(async (req: any, res: Response) => {
+     const project = await projectService.getOneProject(req.params.id,req?.user);
+    return sendSuccessResponse(res, "Project Deleted successfully", 200, project);
+  });
 }

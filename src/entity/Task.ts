@@ -4,11 +4,13 @@ import {
   ManyToOne,
   ManyToMany,
   JoinTable,
+  JoinColumn,
 
 } from "typeorm";
 import { User } from "./User";
 import { Project } from "./Project";
 import { BaseEntity } from "./BaseEntity";
+import { Company } from "./Company";
 
 
 @Entity({
@@ -24,8 +26,16 @@ export class Task extends BaseEntity {
   @Column({ type: "boolean", default: false })
   isCompleted: boolean;
 
+  @Column({ type: "text", nullable: true })
+  projectId: string;
+
   @ManyToOne(() => Project, (project) => project.tasks)
+  @JoinColumn({ name: "projectId" })
   project: Project;
+
+  @ManyToOne(() => Company, (company) => company.projects)
+  @JoinColumn({ name: "companyId" })
+  company: Company;
 
   @ManyToMany(() => User, (user) => user.tasks)
   @JoinTable({
@@ -33,5 +43,5 @@ export class Task extends BaseEntity {
     joinColumn: { name: "taskId", referencedColumnName: "id" },
     inverseJoinColumn: { name: "userId", referencedColumnName: "id" },
   })
-  users: User[];
+  users: User[] | null;
 }

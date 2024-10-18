@@ -9,10 +9,11 @@ import { isAuthorized } from "../middleware/authorization";
 const router = express.Router();
 router.use("/auth", authRouter);
 router.use("/projects",isAuthorized, projectRouter);
+router.use("/tasks", isAuthorized, taskRouter);
 router.use("/companies", isAuthorized, companyRouter);
 router.use("/users", userRouter);
 
-router.use("/tasks", taskRouter);
+
 
 
 export default router;

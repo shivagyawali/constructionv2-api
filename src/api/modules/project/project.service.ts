@@ -14,28 +14,22 @@ import { StatusCodes } from "http-status-codes";
 
 export class ProjectService {
   private projectRepository = AppDataSource.getRepository(Project);
-  private userRepo = AppDataSource.getRepository(User);
-  async createProject({
-    body: { name, description },
-    user: { id: userId },
-  }: any) {
-    const user = await this.userRepo.findOne({
-      where: { id: userId },
-      relations: ["company"],
-    });
+  async createProject(req: any) {
+     const { company, role } = req.user;
+   
     if (
-      user?.role !== UserRole.ROOT &&
-      user?.role !== UserRole.CLIENT &&
-      !user?.company
+      role !== UserRole.ROOT &&
+      role !== UserRole.CLIENT &&
+      !company
     ) {
       throw new BadRequestError(
         "You are not yet registered with any company yet"
       );
     }
     const newProject = await this.projectRepository.save({
-      name,
-      description: description || null,
-      company: user?.company || null,
+      name: req.body.name,
+      description: req.body.description || null,
+      company: company || null,
     });
 
     return {
@@ -93,5 +87,20 @@ export class ProjectService {
     if (project) {
       await this.projectRepository.remove(project);
     }
+  }
+  async getOneProject(id: string, user: any) {
+    const where = {
+      id,
+      ...(user.role === UserRole.CLIENT && { company: { id: user.companyId } }),
+    };
+    const project = await this.projectRepository.findOne({
+      where,
+      relations: ["tasks", "company"],
+    });
+    if (!project && user.role !== UserRole.ROOT) {
+      throw new NotFoundError("Project not found.");
+    }
+     return project
+   
   }
 }

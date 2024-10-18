@@ -39,6 +39,7 @@ export const isAuthorized = asyncHandler(
       id: user.id,
       name: user.name,
       role: user.role,
+      company:user?.company,
       companyId: user?.company?.id,
       permissions: await user.fetchPermissionsByRole(),
     };
@@ -50,6 +51,8 @@ export const isAuthorized = asyncHandler(
 
 export const authorize = (resource: string, action: string) => {
   return (req: any, res: Response, next: NextFunction) => {
+    console.log(resource,'-----');
+    
     if (!req.user) {
       return sendErrorResponse(
         res,

@@ -4,6 +4,7 @@ import { User } from "./User";
 import { BaseEntity } from "./BaseEntity";
 import { Project } from "./Project";
 import { CompanyStatus } from "../api/enum";
+import { Task } from "./Task";
 @Entity({
   name: "companies",
 })
@@ -35,4 +36,7 @@ export class Company extends BaseEntity {
 
   @OneToMany(() => Project, (project) => project.company)
   projects: Project[];
+
+  @OneToMany(() => Task, (task) => task.company)
+  tasks: Task[];
 }
