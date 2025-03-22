@@ -51,8 +51,6 @@ export const isAuthorized = asyncHandler(
 
 export const authorize = (resource: string, action: string) => {
   return (req: any, res: Response, next: NextFunction) => {
-    console.log(resource,'-----');
-    
     if (!req.user) {
       return sendErrorResponse(
         res,

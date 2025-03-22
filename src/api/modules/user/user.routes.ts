@@ -1,8 +1,10 @@
 import { Router } from "express";
 import { UserController } from "./user.controller";
+import { checkAccess } from "../../helpers/checkAccess";
 const router = Router();
-router.post("/", UserController.createUser);
-router.get("/", UserController.getAllUsers);
+router.use(checkAccess);
+router.post("/create", UserController.createUser);
+router.get("/list", UserController.getAllUsers);
 router.put("/:id", UserController.updateUser);
 router.delete("/:id", UserController.deleteUser);
 

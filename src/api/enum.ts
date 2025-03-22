@@ -1,7 +1,7 @@
 export enum UserRole {
   ROOT = "root",
   ADMIN = "admin",
-  CLIENT = "client",
+  CLIENT = "client", //can have subuser.. ex: users->subuser 1
   WORKER = "worker",
 }
 

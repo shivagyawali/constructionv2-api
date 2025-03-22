@@ -6,7 +6,7 @@ import { ApiError } from "./ApiError";
 const asyncHandler = (requestHandler: RequestHandler) => {
   return (req: Request, res: Response, next: NextFunction) => {
     // No need for a try-catch here since it will automatically catch async errors
-    Promise.resolve(requestHandler(req, res, next)).catch((error: any) => {
+    Promise.resolve(requestHandler(req, res, next)).catch((error: any) => {      
       next(
         new ApiError(
           error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,

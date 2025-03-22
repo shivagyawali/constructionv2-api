@@ -1,4 +1,4 @@
-import { AppDataSource } from "../../config/db";
+ import { AppDataSource } from "../../config/db";
 import { User } from "../../entity/User";
 import bcrypt from "bcryptjs";
 import { UserRole } from "../enum";

@@ -6,18 +6,28 @@ export const checkAccess = (
   res: Response,
   next: NextFunction
 ) => {
-  const resource = req.originalUrl.split("/")[2]; 
+  const resource = req.originalUrl.split("/")[2]; // Extracts the resource from URL
   const method = req.method.toLowerCase();
-  const actionMap: any = {
-    post: "create",
-    put: "edit",
-    delete: "delete",
-  };
-  let action = actionMap[method];
-  if (method === "get") {
-    const isSingleResource = req.originalUrl.split("/").length > 3;
-    action = isSingleResource ? "read" : "view";
-  }
 
-  authorize(resource, action)(req, res, next);
+  const actionMap: Record<string, string[]> = {
+    post: ["create", "add", "start", "end"],
+    put: ["edit"],
+    delete: ["delete"],
+  };
+
+  let actions: any =  Array.isArray(actionMap[method]) ?actionMap[method][0] : null;
+
+  if (method === "get") {
+    const getAction = getActionFromUrl(req);
+    actions = Array.isArray(getAction) ? getAction : getAction;
+  }
+ 
+  
+  authorize(resource, actions)(req, res, next);
+};
+const getActionFromUrl = (req:any) => {
+  const urlParts = req && req.originalUrl && req.originalUrl.split("/");
+  const actions = ["*", "list", "read", "view"];
+
+  return urlParts.find((part:any) => actions.includes(part)) || null;
 };

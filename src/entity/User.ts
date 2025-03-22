@@ -7,6 +7,9 @@ import { BaseEntity } from "./BaseEntity";
 import { AppDataSource } from "../config/db";
 import { Permission } from "./Permission";
 import { UserRole } from "../api/enum";
+import { Exclude } from "class-transformer";
+import { WorkLog } from "./WorkLog";
+import { Invoice } from "./Invoice";
 @Entity({
   name: "users",
 })
@@ -29,6 +32,7 @@ export class User extends BaseEntity {
     }
   }
 
+  @Exclude()
   @IsString()
   @Column()
   password: string;
@@ -42,6 +46,9 @@ export class User extends BaseEntity {
   @Column({ default: false })
   isActive: boolean;
 
+  @Column({ default: true })
+  isSubAccount: boolean;
+
   @Column({ default: false })
   isPasswordChangeRequired: boolean;
 
@@ -50,6 +57,9 @@ export class User extends BaseEntity {
 
   @Column({ nullable: true })
   companyId: string;
+
+  @Column({ nullable: true,default:8 })
+  hourlyRate: string;
 
   @ManyToMany(() => Task, (task) => task.users)
   tasks: Task[];
@@ -72,4 +82,10 @@ export class User extends BaseEntity {
 
     return permissionsByResource;
   }
+
+  @OneToMany(() => WorkLog, (workLog) => workLog.user)
+  workLogs: WorkLog[];
+
+  @OneToMany(() => WorkLog, (workLog) => workLog.user)
+  invoices: Invoice[];
 }

@@ -13,7 +13,7 @@ import {
 import { StatusCodes } from "http-status-codes";
 import { Project } from "../../../entity/Project";
 import { In } from "typeorm";
-import { maskSensitiveInfo } from "../../helpers/maskSensitiveInfo";
+import { instanceToPlain } from "class-transformer";
 
 export class TaskService {
   private taskRepository = AppDataSource.getRepository(Task);
@@ -33,7 +33,7 @@ export class TaskService {
 
   const users = userIds
     ? await AppDataSource.getRepository(User).find({
-        where: { id: In(userIds) },
+        where: { id: In(userIds),role:UserRole.WORKER },
       })
     : null;
 
@@ -75,16 +75,8 @@ export class TaskService {
       take: 10,
       order: { createdAt: "DESC" },
     });
-     const maskedResults = results.map((task:any) => {
-       const maskedTask = {
-         ...task,
-         company: task.company ? maskSensitiveInfo([task.company])[0] : null,
-         project: task.project ? maskSensitiveInfo([task.project])[0] : null,
-         users: maskSensitiveInfo(task.users),
-       };
-       return maskedTask;
-     });
-    return { ...paginate(page, count), results: maskedResults, count };
+   
+    return { ...paginate(page, count), results: instanceToPlain(results), count };
   };
 
   async updateTask(id: string, data: any): Promise<Task | null> {

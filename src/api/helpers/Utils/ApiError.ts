@@ -42,4 +42,9 @@ export class InvalidCredentialsError extends ApiError {
     super(StatusCodes.UNAUTHORIZED, message); // HTTP 401 Unauthorized status
   }
 }
+export class DuplicateError extends ApiError {
+  constructor(message: string = "Already Exits.") {
+    super(StatusCodes.CONFLICT, message); // HTTP 401 Unauthorized status
+  }
+}
 
