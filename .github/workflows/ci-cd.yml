@@ -14,7 +14,7 @@ jobs:
 
     env:
       # Application Configuration
-      PORT: 4000
+      PORT: ${{ secrets.PORT }}
       APP_ENV: test
       SIGNATURE_EXPIRY: 30
       MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
@@ -56,7 +56,7 @@ jobs:
 
     env:
       # Application Configuration
-      PORT: 4000
+      PORT: ${{ secrets.PORT }}
       APP_ENV: test
       SIGNATURE_EXPIRY: 30
       MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
@@ -84,7 +84,7 @@ jobs:
             # Run the new Docker container with the environment variables
             docker run -d \
               --name api_construction \
-              -p 4000:4000 \
+              -p ${{ secrets.PORT }}:${{ secrets.PORT }} \
               -e PORT=${{ secrets.PORT }} \
               -e APP_ENV=${{ secrets.APP_ENV }} \
               -e SIGNATURE_EXPIRY=${{ secrets.SIGNATURE_EXPIRY }} \
