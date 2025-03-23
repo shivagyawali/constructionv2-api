@@ -50,8 +50,10 @@ jobs:
           host: ${{ secrets.SERVER_IP }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
           script: |
             docker pull constructthecompany/api_construction:latest
             docker stop api_construction || true
             docker rm api_construction || true
             docker run -d --name api_construction -p 4000:4000 constructthecompany/api_construction:latest
+
