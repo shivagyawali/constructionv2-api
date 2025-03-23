@@ -1,0 +1,500 @@
+openapi: 3.0.0
+info:
+  title: Construction v2
+  version: 1.0.0
+servers:
+  - url: http://{{url}}
+tags:
+  - name: Auth
+  - name: Company
+  - name: Project
+  - name: Task
+  - name: Users
+  - name: Work Log Service
+  - name: Invoices
+paths:
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      summary: Login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: iamshivagyawali@gmail.com
+                password: shiva@123
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /companies/register:
+    post:
+      tags:
+        - Company
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                companyName: Shiva & Co.
+                companyEmail: shiva@gmail.com
+                name: Shiva Gyawali
+                email: shiva@gmail.com
+                password: shiva@123
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /projects/list:
+    get:
+      tags:
+        - Project
+      summary: Retrieve all Project
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /projects/{id}:
+    get:
+      tags:
+        - Project
+      summary: Get One Project
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 75056021-9a86-4df2-8d4b-3bcfb699c0ee
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    put:
+      tags:
+        - Project
+      summary: Update Project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: 'Second Project By Shiva & Co Updated '
+                description: A new project description by Second and co
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 75056021-9a86-4df2-8d4b-3bcfb699c0ee
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Project
+      summary: Delete Project
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: b824a211-58d0-403b-85f7-cdb1a659d8e6
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /projects/create:
+    post:
+      tags:
+        - Project
+      summary: Create Project
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                name: 'First Project By Ashish & Co '
+                description: A new project description by First and co
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /tasks/list:
+    get:
+      tags:
+        - Task
+      summary: Retrieve all Task
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /tasks/create:
+    post:
+      tags:
+        - Task
+      summary: Create Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: New Task Example
+                description: This is a detailed description of the task.
+                projectId: 5c872fed-bef2-4943-9c4c-fe978d0d1e95
+                userIds:
+                  - 3a3b7f74-4bf7-4980-9698-46fc61f9cf0f
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /tasks/{id}:
+    put:
+      tags:
+        - Task
+      summary: Update Task
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: New Task Example
+                description: This is a detailed description of the task.
+                projectId: 75056021-9a86-4df2-8d4b-3bcfb699c0ee
+                userIds:
+                  - 3a3b7f74-4bf7-4980-9698-46fc61f9cf0f
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: cebc03c3-c1df-4337-aba4-39916b536b51
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Task
+      summary: Delete Task
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 9abb5d19-e480-4241-8694-c428d5a95c3d
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /users/list:
+    get:
+      tags:
+        - Users
+      summary: Retrieve all Users
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /users/create:
+    post:
+      tags:
+        - Users
+      summary: Create User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                email: shiva1@gmail.com
+                name: Shiva Gyawali
+                role: worker
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /users/{id}:
+    put:
+      tags:
+        - Users
+      summary: Update User
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                title: New Task Example
+                description: This is a detailed description of the task.
+                projectId: 75056021-9a86-4df2-8d4b-3bcfb699c0ee
+                userIds:
+                  - 3a3b7f74-4bf7-4980-9698-46fc61f9cf0f
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: cebc03c3-c1df-4337-aba4-39916b536b51
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+    delete:
+      tags:
+        - Users
+      summary: Delete User
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+        - name: id
+          in: path
+          schema:
+            type: string
+          required: true
+          example: 44e36b22-87ec-4127-9b9c-734bac2eeaa7
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /worklogs/list:
+    get:
+      tags:
+        - Work Log Service
+      summary: Retrieve all My Logs
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /worklogs/start:
+    post:
+      tags:
+        - Work Log Service
+      summary: Create Log
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                latitude: '27.6588'
+                longitude: '83.5710'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /worklogs/end:
+    post:
+      tags:
+        - Work Log Service
+      summary: Stop Work Logs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                latitude: '27.6588'
+                longitude: '83.5710'
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoices/list:
+    get:
+      tags:
+        - Invoices
+      summary: Retrieve all Invoices
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoices/create:
+    post:
+      tags:
+        - Invoices
+      summary: Create
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                startDate: '2025-03-12'
+                endDate: '2025-03-12'
+                userId: 44e36b22-87ec-4127-9b9c-734bac2eeaa7
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}
+  /invoices/{invoiceId}/pay:
+    put:
+      tags:
+        - Invoices
+      summary: Paid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                startDate: '2025-03-12'
+                endDate: '2025-03-12'
+                userId: 44e36b22-87ec-4127-9b9c-734bac2eeaa7
+      parameters:
+        - name: Authorization
+          in: header
+          schema:
+            type: string
+          example: '{{token}}'
+        - name: invoiceId
+          in: path
+          schema:
+            type: string
+          required: true
+          example: d9fd41db-1f6c-4f1d-ac2f-8c831b01a26b
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json: {}

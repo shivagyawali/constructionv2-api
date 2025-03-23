@@ -33,9 +33,9 @@ async function startServer(): Promise<void> {
   const app = express();
 
   const port = process.env.PORT || 4000;
-  //const swaggerDocument = YAML.load(path.resolve(__dirname, "./swagger.yaml"));
+  const swaggerDocument = YAML.load(path.resolve(__dirname, "./swagger.yaml"));
   const corsOptions = {
-    origin: ["http://localhost:3000", "http://209.38.0.76"], // Your React app's URLs
+    origin: "*", // Your React app's URLs
     credentials: true, // Enable credentials
   };
 
@@ -44,8 +44,8 @@ async function startServer(): Promise<void> {
   app.use(express.json({ limit: "50mb" }));
   app.use(express.urlencoded({ limit: "50mb", extended: true }));
   app.use(morgan("tiny"));
-  // app.use("/api-docs", swaggerUi.serve);
-  // app.get("/api-docs", swaggerUi.setup(swaggerDocument));
+  app.use("/api-docs", swaggerUi.serve);
+  app.get("/api-docs", swaggerUi.setup(swaggerDocument));
 
 const errorHandler = (
   err: ApiError,
