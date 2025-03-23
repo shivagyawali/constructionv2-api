@@ -12,6 +12,17 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
+    env:
+      # Application Configuration
+      PORT: 4000
+      APP_ENV: test
+      SIGNATURE_EXPIRY: 30
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
@@ -43,6 +54,17 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
 
+    env:
+      # Application Configuration
+      PORT: 4000
+      APP_ENV: test
+      SIGNATURE_EXPIRY: 30
+      MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+      MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+      MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+
     steps:
       - name: SSH into Server and Deploy
         uses: appleboy/ssh-action@master
@@ -52,8 +74,23 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
+            # Pull the latest Docker image
             docker pull constructthecompany/api_construction:latest
+
+            # Stop and remove the existing container if running
             docker stop api_construction || true
             docker rm api_construction || true
-            docker run -d --name api_construction -p 4000:4000 constructthecompany/api_construction:latest
 
+            # Run the new Docker container with the environment variables
+            docker run -d \
+              --name api_construction \
+              -p 4000:4000 \
+              -e PORT=${{ secrets.PORT }} \
+              -e APP_ENV=${{ secrets.APP_ENV }} \
+              -e SIGNATURE_EXPIRY=${{ secrets.SIGNATURE_EXPIRY }} \
+              -e MYSQL_HOST=${{ secrets.MYSQL_HOST }} \
+              -e MYSQL_PORT=${{ secrets.MYSQL_PORT }} \
+              -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
+              -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
+              -e MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} \
+              constructthecompany/api_construction:latest
