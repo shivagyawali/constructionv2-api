@@ -5,12 +5,14 @@ import {
   ManyToMany,
   JoinTable,
   JoinColumn,
+  OneToMany,
 
 } from "typeorm";
 import { User } from "./User";
 import { Project } from "./Project";
 import { BaseEntity } from "./BaseEntity";
 import { Company } from "./Company";
+import { TaskComment } from "./TaskComment";
 
 
 @Entity({
@@ -44,4 +46,7 @@ export class Task extends BaseEntity {
     inverseJoinColumn: { name: "userId", referencedColumnName: "id" },
   })
   users: User[] | null;
+
+  @OneToMany(() => TaskComment, (comment) => comment.task)
+  comments: TaskComment[];
 }

@@ -10,6 +10,7 @@ import { UserRole } from "../api/enum";
 import { Exclude } from "class-transformer";
 import { WorkLog } from "./WorkLog";
 import { Invoice } from "./Invoice";
+import { TaskComment } from "./TaskComment";
 @Entity({
   name: "users",
 })
@@ -58,7 +59,7 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   companyId: string;
 
-  @Column({ nullable: true,default:8 })
+  @Column({ nullable: true, default: 8 })
   hourlyRate: string;
 
   @ManyToMany(() => Task, (task) => task.users)
@@ -88,4 +89,7 @@ export class User extends BaseEntity {
 
   @OneToMany(() => WorkLog, (workLog) => workLog.user)
   invoices: Invoice[];
+
+  @OneToMany(() => TaskComment, (comment) => comment.user)
+  taskComments: TaskComment[];
 }

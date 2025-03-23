@@ -9,4 +9,6 @@ router.get("/list", TaskController.getAllTasks);
 router.put("/:id", TaskController.updateTask);
 router.delete("/:id", TaskController.deleteTask);
 
+router.post("/:taskId/comments", TaskController.createCommentOnTask);
+
 export default router;
