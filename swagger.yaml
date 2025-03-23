@@ -3,7 +3,7 @@ info:
   title: Construction v2
   version: 1.0.0
 servers:
-  - url: http://138.197.141.19:5000/api
+  - url: https://api.buildersoft.ca/api
 tags:
   - name: Auth
   - name: Company
