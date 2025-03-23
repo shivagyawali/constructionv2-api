@@ -14,4 +14,11 @@ export const defaultConfig = {
     password: process.env.MYSQL_PASSWORD || "",
     database: process.env.MYSQL_DATABASE || "constructionms-v2",
   },
+  mail: {
+    host: process.env.MAIL_HOST || "",
+    port: process.env.MAIL_PORT || "",
+    user: process.env.MAIL_USER || "",
+    password: process.env.MAIL_PASSWORD || "",
+    sender: process.env.MAIL_SENDER || "",
+  },
 };

@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import * as crypto from "crypto";
 import { DuplicateError, NotFoundError } from "../../helpers/Utils/ApiError";
 import { sendSuccessResponse } from "../../helpers/Utils/response";
+import { sendEmail } from "../../helpers/sendEmail";
 export class UserService {
   private userRepository = AppDataSource.getRepository(User);
 
@@ -24,8 +25,13 @@ export class UserService {
       isActive:true,
       company: data?.company,
     });
-    await user.save();
+    
     //send email with random password
+    await sendEmail("DEFAULT_PASSWORD", data.email, {
+      name:data.name,
+      password: password,
+    });
+    await user.save();
     return user;
   }
   getAllUsers = async (
