@@ -10,19 +10,13 @@ export const checkAccess = (
   const method = req.method.toLowerCase();
 
   const actionMap: Record<string, string[]> = {
+    get: ["list", "read", "view"],
     post: ["create", "add", "start", "end"],
     put: ["edit"],
     delete: ["delete"],
   };
 
   let actions: any =  Array.isArray(actionMap[method]) ?actionMap[method][0] : null;
-
-  if (method === "get") {
-    const getAction = getActionFromUrl(req);
-    actions = Array.isArray(getAction) ? getAction : getAction;
-  }
- 
-  
   authorize(resource, actions)(req, res, next);
 };
 const getActionFromUrl = (req:any) => {
