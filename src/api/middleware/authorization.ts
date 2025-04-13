@@ -39,7 +39,8 @@ export const isAuthorized = asyncHandler(
       id: user.id,
       name: user.name,
       role: user.role,
-      company:user?.company,
+      avatar: user?.avatar,
+      company: user?.company,
       companyId: user?.company?.id,
       permissions: await user.fetchPermissionsByRole(),
     };
