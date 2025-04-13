@@ -28,6 +28,7 @@ export class ProjectService {
     }
     const newProject = await this.projectRepository.save({
       name: req.body.name,
+      status: "INPROGRESS",
       description: req.body.description || null,
       company: company || null,
     });
