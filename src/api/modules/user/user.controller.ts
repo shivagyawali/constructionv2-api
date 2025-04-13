@@ -66,4 +66,8 @@ export class UserController {
     const user = await userService.deleteUser({ id: req.params.id, company });
      return sendSuccessResponse(res, "User deleted Successfully", 200, user);
   });
+  static profile = asyncHandler(async (req: any, res: Response) => {
+    const user = req.user;
+     return sendSuccessResponse(res, "User fetch Successfully", 200, user);
+  });
 }

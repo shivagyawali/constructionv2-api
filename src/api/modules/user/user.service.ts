@@ -20,15 +20,15 @@ export class UserService {
       ...data,
       password: await bcrypt.hash(password, 10),
       role: data.role,
-      isSubAccount: data && data.role===UserRole.CLIENT?true:false,
+      isSubAccount: data && data.role === UserRole.CLIENT ? true : false,
       isPasswordChangeRequired: true,
-      isActive:true,
+      isActive: true,
       company: data?.company,
     });
-    
+
     //send email with random password
     await sendEmail("DEFAULT_PASSWORD", data.email, {
-      name:data.name,
+      name: data.name,
       password: password,
     });
     await user.save();
@@ -43,21 +43,21 @@ export class UserService {
     const { user } = req || {};
     const { role, companyId, isSubaccount } = user || {};
 
-  let where: any = { ...constructWhereConditions(filters) };
-  if (role === UserRole.CLIENT && !isSubaccount && companyId) {
-    where = [
-      { role: UserRole.CLIENT, company: { id: companyId } },
-      { role: UserRole.WORKER, company: { id: companyId } },
-    ];
-  }
+    let where: any = { ...constructWhereConditions(filters) };
+    if (role === UserRole.CLIENT && !isSubaccount && companyId) {
+      where = [
+        { role: UserRole.CLIENT, company: { id: companyId } },
+        { role: UserRole.WORKER, company: { id: companyId } },
+      ];
+    }
 
-  const [results, count] = await this.userRepository.findAndCount({
-    where,
-    relations: ["company"],
-    skip: (page - 1) * 10,
-    take: 10,
-    order: { createdAt: "DESC" },
-  });
+    const [results, count] = await this.userRepository.findAndCount({
+      where,
+      relations: ["company"],
+      skip: (page - 1) * 10,
+      take: 10,
+      order: { createdAt: "DESC" },
+    });
 
     return {
       ...paginate(page, count),
@@ -79,6 +79,7 @@ export class UserService {
     });
     if (!user) throw new NotFoundError("User not found");
     await this.userRepository.delete(data.id);
-   return instanceToPlain(user);
+    return instanceToPlain(user);
   }
+ 
 }

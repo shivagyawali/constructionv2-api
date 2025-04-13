@@ -10,7 +10,7 @@ export const checkAccess = (
   const method = req.method.toLowerCase();
 
   const actionMap: Record<string, string[]> = {
-    get: ["list", "read", "view"],
+    get: ["list", "read", "view","profile"],
     post: ["create", "add", "start", "end"],
     put: ["edit"],
     delete: ["delete"],
