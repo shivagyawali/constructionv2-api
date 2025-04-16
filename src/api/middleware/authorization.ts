@@ -24,7 +24,7 @@ export const isAuthorized = asyncHandler(
     const userRepo = AppDataSource.getRepository(User);
     const user: any = await userRepo.findOne({
       where: { id: decodedToken.userId },
-      relations: ["company"],
+      relations: ["company","tasks"],
     });
 
     if (!user) {
@@ -43,6 +43,7 @@ export const isAuthorized = asyncHandler(
       company: user?.company,
       companyId: user?.company?.id,
       permissions: await user.fetchPermissionsByRole(),
+      tasks:user?.tasks
     };
 
     next();
