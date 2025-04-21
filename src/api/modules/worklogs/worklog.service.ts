@@ -55,9 +55,11 @@ export class WorkLogService {
   }
 
   async getWorkLogs(userId: any) {
-    return instanceToPlain(await this.workLogRepo.find({
-      where: { user: { id: userId } },
-      order: { startTime: "DESC" },
-    }))
+    return 
+      await this.workLogRepo.find({
+        where: { user: { id: userId } },
+        order: { startTime: "DESC" },
+      })
+    
   }
 }
