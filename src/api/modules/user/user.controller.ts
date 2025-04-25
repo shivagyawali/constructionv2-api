@@ -66,6 +66,20 @@ export class UserController {
     const user = await userService.deleteUser({ id: req.params.id, company });
      return sendSuccessResponse(res, "User deleted Successfully", 200, user);
   });
+  static getOne = asyncHandler(async (req: any, res: Response) => {
+    const { role, isSubAccount, company } = req.user;
+
+    if (
+      (isSubAccount && role === UserRole.CLIENT) ||
+      role === UserRole.WORKER
+    ) {
+      throw new ForbiddenError(
+        "You don't have permission to perform this action"
+      );
+    }
+    const user = await userService.getOneUser({ id: req.params.id, company });
+     return sendSuccessResponse(res, "User fetch Successfully", 200, user);
+  });
   static profile = asyncHandler(async (req: any, res: Response) => {
     const user = req.user;
      return sendSuccessResponse(res, "User fetch Successfully", 200, user);

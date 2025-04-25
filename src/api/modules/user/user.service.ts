@@ -81,5 +81,13 @@ export class UserService {
     await this.userRepository.delete(data.id);
     return instanceToPlain(user);
   }
+  async getOneUser(data: any) {
+    const user = await this.userRepository.findOne({
+      where: { id: data.id, isSubAccount: true, companyId: data.company.id },
+    });
+    if (!user) throw new NotFoundError("User not found");
+    
+    return instanceToPlain(user);
+  }
  
 }
