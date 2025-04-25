@@ -70,8 +70,8 @@ export class UserController {
     const { role, isSubAccount, company } = req.user;
 
     if (
-      (isSubAccount && role === UserRole.CLIENT) ||
-      role === UserRole.WORKER
+      (!isSubAccount && role === UserRole.CLIENT) ||
+      role === UserRole.ROOT
     ) {
       throw new ForbiddenError(
         "You don't have permission to perform this action"
