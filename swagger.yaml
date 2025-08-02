@@ -1,336 +1,631 @@
-openapi: 3.0.0
+```yaml
+openapi: 3.0.3
 info:
-  title: Construction v2
+  title: Construction API v2
   version: 1.0.0
+  description: API for managing construction-related resources such as projects, tasks, users, invoices, and permissions.
 servers:
   - url: https://api.buildersoft.ca/api
-tags:
-  - name: Auth
-  - name: Company
-  - name: Project
-  - name: Task
-  - name: Users
-  - name: Work Log Service
-  - name: Invoices
-
+    description: Production server
+  - url: http://localhost:4000/api
+    description: Local development server
 components:
   securitySchemes:
     BearerAuth:
-      type: apiKey
-      in: header
-      name: Authorization
-      description: "Bearer token for authentication"
-   
-security:
-      - BearerAuth: [] 
-
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+          example: shiva@gmail.com
+        password:
+          type: string
+          example: shiva@123
+    Project:
+      type: object
+      required:
+        - name
+        - description
+      properties:
+        name:
+          type: string
+          example: First Project By Ashish & Co
+        description:
+          type: string
+          example: A new project description by First and co
+    Company:
+      type: object
+      required:
+        - companyName
+        - companyEmail
+        - name
+        - email
+        - password
+      properties:
+        companyName:
+          type: string
+          example: Shiva & Co.
+        companyEmail:
+          type: string
+          example: shiva@gmail.com
+        name:
+          type: string
+          example: Shiva Gyawali
+        email:
+          type: string
+          example: shiva@gmail.com
+        password:
+          type: string
+          example: shiva@123
+    Task:
+      type: object
+      required:
+        - title
+        - description
+        - projectId
+      properties:
+        title:
+          type: string
+          example: New Task Example
+        description:
+          type: string
+          example: This is a detailed description of the task.
+        projectId:
+          type: string
+          format: uuid
+          example: 78fcd709-9bc5-4e87-abf8-dc39f45faa66
+        userIds:
+          type: array
+          items:
+            type: string
+            format: uuid
+          example: ["84e0bea2-31c0-4703-ac2f-180486e910cf"]
+    User:
+      type: object
+      required:
+        - email
+        - name
+        - role
+      properties:
+        email:
+          type: string
+          example: shiv.alfa8@gmail.com
+        name:
+          type: string
+          example: Shiva Gyawali
+        role:
+          type: string
+          example: worker
+    WorkLog:
+      type: object
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          type: string
+          example: "27.6588"
+        longitude:
+          type: string
+          example: "83.5710"
+    Invoice:
+      type: object
+      required:
+        - startDate
+        - endDate
+        - userId
+      properties:
+        startDate:
+          type: string
+          format: date
+          example: 2025-03-12
+        endDate:
+          type: string
+          format: date
+          example: 2025-03-12
+        userId:
+          type: string
+          format: uuid
+          example: 44e36b22-87ec-4127-9b9c-734bac2eeaa7
+    Permission:
+      type: object
+      required:
+        - name
+        - resource
+        - rolePermissions
+      properties:
+        name:
+          type: string
+          example: tests
+        resource:
+          type: string
+          example: create,read,update,delete,view,edit,list
+        rolePermissions:
+          type: string
+          example: '[{"role":"root","permissions":["create","delete","edit","list","read","view","update","*"]},{"role":"client","permissions":["create","delete","edit","list","view","update"]},{"role":"admin","permissions":["list","read","view","edit","update","create"]},{"role":"worker","permissions":["read","list","view"]}]'
 paths:
   /auth/login:
     post:
+      summary: User login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successful login, returns token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      token:
+                        type: string
       tags:
         - Auth
-      summary: Login
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                email: iamshivagyawali@gmail.com
-                password: shiva@123
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-
-  /companies/register:
-    post:
-      tags:
-        - Company
-      summary: Create
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                companyName: Shiva & Co.
-                companyEmail: shiva@gmail.com
-                name: Shiva Gyawali
-                email: shiva@gmail.com
-                password: shiva@123
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-
   /projects/list:
     get:
-      tags:
-        - Project
-      summary: Retrieve all Projects
+      summary: Retrieve all projects
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
       responses:
         '200':
-          description: Successful response
+          description: List of projects
           content:
-            application/json: {}
-
-  /projects/{id}:
-    get:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
       tags:
         - Project
-      summary: Get One Project
+  /projects/{id}:
+    get:
+      summary: Get one project
+      security:
+        - BearerAuth: []
       parameters:
         - name: id
           in: path
+          required: true
           schema:
             type: string
-          required: true
-          example: 75056021-9a86-4df2-8d4b-3bcfb699c0ee
+            format: uuid
       responses:
         '200':
-          description: Successful response
+          description: Project details
           content:
-            application/json: {}
-    put:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
       tags:
         - Project
-      summary: Update Project
+    put:
+      summary: Update a project
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: 'Second Project By Shiva & Co Updated'
-                description: A new project description by Second and Co
+              $ref: '#/components/schemas/Project'
       responses:
         '200':
-          description: Successful response
-          content:
-            application/json: {}
-    delete:
+          description: Project updated
       tags:
         - Project
-      summary: Delete Project
+    delete:
+      summary: Delete a project
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-
+        '204':
+          description: Project deleted
+      tags:
+        - Project
   /projects/create:
     post:
+      summary: Create a project
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Project'
+      responses:
+        '201':
+          description: Project created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
       tags:
         - Project
-      summary: Create Project
+  /companies/register:
+    post:
+      summary: Register a company
+      security:
+        - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              example:
-                name: 'First Project By Ashish & Co'
-                description: A new project description by First and Co
+              $ref: '#/components/schemas/Company'
       responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-
+        '201':
+          description: Company created
+      tags:
+        - Company
   /tasks/list:
     get:
-      tags:
-        - Task
-      summary: Retrieve all Tasks
+      summary: Retrieve all tasks
+      security:
+        - BearerAuth: []
       responses:
         '200':
-          description: Successful response
+          description: List of tasks
           content:
-            application/json: {}
-
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+      tags:
+        - Task
   /tasks/create:
     post:
-      tags:
-        - Task
-      summary: Create Task
+      summary: Create a task
+      security:
+        - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              example:
-                title: New Task Example
-                description: This is a detailed description of the task.
-                projectId: 5c872fed-bef2-4943-9c4c-fe978d0d1e95
-                userIds:
-                  - 3a3b7f74-4bf7-4980-9698-46fc61f9cf0f
+              $ref: '#/components/schemas/Task'
       responses:
-        '200':
-          description: Successful response
+        '201':
+          description: Task created
           content:
-            application/json: {}
-
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+      tags:
+        - Task
   /tasks/{id}:
     put:
-      tags:
-        - Task
-      summary: Update Task
+      summary: Update a task
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              example:
-                title: New Task Example
-                description: This is a detailed description of the task.
-                projectId: 75056021-9a86-4df2-8d4b-3bcfb699c0ee
-                userIds:
-                  - 3a3b7f74-4bf7-4980-9698-46fc61f9cf0f
+              $ref: '#/components/schemas/Task'
       responses:
         '200':
-          description: Successful response
-          content:
-            application/json: {}
-    delete:
+          description: Task updated
       tags:
         - Task
-      summary: Delete Task
+    delete:
+      summary: Delete a task
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-
+        '204':
+          description: Task deleted
+      tags:
+        - Task
   /users/list:
     get:
-      tags:
-        - Users
-      summary: Retrieve all Users
+      summary: Retrieve all users
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+            default: 1
       responses:
         '200':
-          description: Successful response
+          description: List of users
           content:
-            application/json: {}
-
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+      tags:
+        - Users
+  /users/{id}:
+    get:
+      summary: Retrieve one user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      tags:
+        - Users
+    delete:
+      summary: Delete a user
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: User deleted
+      tags:
+        - Users
+  /users/profile:
+    get:
+      summary: Retrieve user profile
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: User profile details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+      tags:
+        - Users
   /users/create:
     post:
+      summary: Create a user
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
       tags:
         - Users
-      summary: Create User
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                email: shiva1@gmail.com
-                name: Shiva Gyawali
-                role: worker
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-
   /worklogs/list:
     get:
-      tags:
-        - Work Log Service
-      summary: Retrieve all My Logs
+      summary: Retrieve all work logs
+      security:
+        - BearerAuth: []
       responses:
         '200':
-          description: Successful response
+          description: List of work logs
           content:
-            application/json: {}
-
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkLog'
+      tags:
+        - Work Log Service
   /worklogs/start:
     post:
-      tags:
-        - Work Log Service
-      summary: Create Log
+      summary: Create a work log
+      security:
+        - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              example:
-                latitude: '27.6588'
-                longitude: '83.5710'
+              $ref: '#/components/schemas/WorkLog'
       responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-
+        '201':
+          description: Work log created
+      tags:
+        - Work Log Service
   /worklogs/end:
     post:
+      summary: Stop a work log
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkLog'
+      responses:
+        '200':
+          description: Work log stopped
       tags:
         - Work Log Service
-      summary: Stop Work Logs
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              example:
-                latitude: '27.6588'
-                longitude: '83.5710'
-      responses:
-        '200':
-          description: Successful response
-          content:
-            application/json: {}
-
   /invoices/list:
     get:
-      tags:
-        - Invoices
-      summary: Retrieve all Invoices
+      summary: Retrieve all invoices
+      security:
+        - BearerAuth: []
       responses:
         '200':
-          description: Successful response
+          description: List of invoices
           content:
-            application/json: {}
-
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invoice'
+      tags:
+        - Invoices
+  /invoices/{userId}:
+    get:
+      summary: Get user invoices
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: List of user invoices
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Invoice'
+      tags:
+        - Invoices
   /invoices/create:
     post:
-      tags:
-        - Invoices
-      summary: Create Invoice
+      summary: Create an invoice
+      security:
+        - BearerAuth: []
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              example:
-                startDate: '2025-03-12'
-                endDate: '2025-03-12'
-                userId: 44e36b22-87ec-4127-9b9c-734bac2eeaa7
+              $ref: '#/components/schemas/Invoice'
       responses:
-        '200':
-          description: Successful response
+        '201':
+          description: Invoice created
           content:
-            application/json: {}
-
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+      tags:
+        - Invoices
   /invoices/{invoiceId}/pay:
     put:
-      tags:
-        - Invoices
-      summary: Pay Invoice
+      summary: Mark invoice as paid
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: invoiceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       requestBody:
+        required: true
         content:
           application/json:
             schema:
-              type: object
-              example:
-                startDate: '2025-03-12'
-                endDate: '2025-03-12'
-                userId: 44e36b22-87ec-4127-9b9c-734bac2eeaa7
+              $ref: '#/components/schemas/Invoice'
       responses:
         '200':
-          description: Successful response
+          description: Invoice marked as paid
+      tags:
+        - Invoices
+  /permissions/list:
+    get:
+      summary: Retrieve all permissions
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of permissions
           content:
-            application/json: {}
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Permission'
+      tags:
+        - Permission
+  /permissions/create:
+    post:
+      summary: Create a permission
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Permission'
+      responses:
+        '201':
+          description: Permission created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Permission'
+      tags:
+        - Permission
+security:
+  - BearerAuth: []
+```
