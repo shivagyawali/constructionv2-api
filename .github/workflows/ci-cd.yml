@@ -104,7 +104,6 @@ jobs:
               -e MYSQL_USERNAME=${{ secrets.MYSQL_USERNAME }} \
               -e MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} \
               -e MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} \
-
               -e MAIL_HOST=${{ secrets.MAIL_HOST }} \
               -e MAIL_PORT=${{ secrets.MAIL_PORT }} \
               -e MAIL_USER=${{ secrets.MAIL_USER }} \
