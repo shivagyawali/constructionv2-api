@@ -22,6 +22,12 @@ jobs:
       MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
       MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
       MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MAIL_HOST: ${{ secrets.MAIL_HOST }}
+      MAIL_PORT: ${{ secrets.MAIL_PORT }} 
+      MAIL_USER: ${{ secrets.MAIL_USER }} 
+      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }} 
+      MAIL_SENDER: ${{ secrets.MAIL_SENDER }} 
+             
 
     steps:
       - name: Checkout Repository
@@ -64,6 +70,11 @@ jobs:
       MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
       MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
       MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+      MAIL_HOST: ${{ secrets.MAIL_HOST }}
+      MAIL_PORT: ${{ secrets.MAIL_PORT }} 
+      MAIL_USER: ${{ secrets.MAIL_USER }} 
+      MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }} 
+      MAIL_SENDER: ${{ secrets.MAIL_SENDER }} 
 
     steps:
       - name: SSH into Server and Deploy
