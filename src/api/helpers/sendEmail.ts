@@ -15,8 +15,7 @@ const replaceVariables = (
   );
 };
 export async function sendEmail(eventType: string, to: any, variables:any) {
-  try {
-   
+
     const emailRepo = AppDataSource.getRepository(EmailTemplate);
 
     const emailTemplate = await emailRepo.findOne({
@@ -42,12 +41,5 @@ export async function sendEmail(eventType: string, to: any, variables:any) {
       subject: emailTemplate.subject,
       html: htmlContent,
     };
-
     await transporter.sendMail(mailOptions);
-    console.log(`Email sent successfully to ${to}`);
-  } catch (error) {
-    console.error("Error sending email:", error);
-  } finally {
-   
-  }
 }

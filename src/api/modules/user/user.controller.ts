@@ -5,6 +5,7 @@ import { sendSuccessResponse } from "../../helpers/Utils/response";
 import { UserRole } from "../../enum";
 import { ForbiddenError } from "../../helpers/Utils/ApiError";
 import { instanceToPlain } from "class-transformer";
+import { sendEmail } from "../../helpers/sendEmail";
 
 
 const userService = new UserService();
@@ -25,6 +26,7 @@ export class UserController {
       req.body.company = req.user.company;
     }
     const user = instanceToPlain(await userService.createUser(req.body));
+    
     return sendSuccessResponse(res, "User created Successfully", 200, user);
   });
 
@@ -67,16 +69,14 @@ export class UserController {
      return sendSuccessResponse(res, "User deleted Successfully", 200, user);
   });
   static getOne = asyncHandler(async (req: any, res: Response) => {
-    const { role, isSubAccount, company } = req.user;
-
+    const { role, isSubAccount, company } = req.user;    
     if (
-      (!isSubAccount && role === UserRole.CLIENT) ||
-      role === UserRole.ROOT
+      (isSubAccount && role === UserRole.CLIENT) 
     ) {
       throw new ForbiddenError(
         "You don't have permission to perform this action"
       );
-    }
+    }   
     const user = await userService.getOneUser({ id: req.params.id, company });
      return sendSuccessResponse(res, "User fetch Successfully", 200, user);
   });
@@ -84,4 +84,5 @@ export class UserController {
     const user = req.user;
      return sendSuccessResponse(res, "User fetch Successfully", 200, user);
   });
+
 }

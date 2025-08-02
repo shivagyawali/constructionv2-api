@@ -38,12 +38,14 @@ export const isAuthorized = asyncHandler(
     req.user = {
       id: user.id,
       name: user.name,
+      email: user.email,
       role: user.role,
       avatar: user?.avatar,
+      isSubAccount: user?.isSubAccount,
       company: user?.company,
       companyId: user?.company?.id,
       permissions: await user.fetchPermissionsByRole(),
-      tasks:user?.tasks
+      tasks: user?.tasks,
     };
 
     next();

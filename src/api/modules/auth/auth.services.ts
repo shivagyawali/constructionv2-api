@@ -54,6 +54,7 @@ export class AuthService {
          role: user.role,
          isVerified: user.isVerified,
          isActive: user.isActive,
+         isSubAccount: user.isSubAccount,
          isPasswordChangeRequired: user.isPasswordChangeRequired,
          permissions: await user.fetchPermissionsByRole(),
        },
