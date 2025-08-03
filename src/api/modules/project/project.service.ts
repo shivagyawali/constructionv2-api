@@ -46,8 +46,13 @@ export class ProjectService {
     page: number = 1,
     filters: { [key: string]: any } = {}
   ) => {
-    const { user: { role, companyId } = {} } = req || {};
-    const where = {
+    const { user: { role,isSubAccount, companyId } = {} } = req || {};
+      if (role !== UserRole.ROOT && role !== UserRole.CLIENT && isSubAccount) {
+        throw new ForbiddenError(
+          "You don't have access to view this page"
+        );
+      }
+    let where = {
       ...constructWhereConditions(filters),
       ...(role === UserRole.CLIENT && { company: { id: companyId } }),
     };

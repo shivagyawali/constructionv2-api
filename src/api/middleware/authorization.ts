@@ -26,7 +26,7 @@ export const isAuthorized = asyncHandler(
       where: { id: decodedToken.userId },
       relations: ["company","tasks"],
     });
-
+    
     if (!user) {
      return sendErrorResponse(
        res,
@@ -67,7 +67,7 @@ export const authorize = (resource: string, action: string) => {
     const permissions = req.user.permissions;   
     if (permissions[resource] && permissions[resource].includes(action)) {
       return next();
-    }
+    }    
     return sendErrorResponse(
       res,
       StatusCodes.FORBIDDEN,
