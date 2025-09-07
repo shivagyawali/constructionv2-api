@@ -7,6 +7,7 @@ import taskRouter from "../modules/task/task.routes";
 import invoiceRouter from "../modules/invoice/invoice.routes";
 import companyRouter from "../modules/company/company.routes";
 import permissionRouter from "../modules/permission/permission.routes";
+import eventRouter from "../modules/events/event.routes";
 import { isAuthorized } from "../middleware/authorization";
 
 const router = express.Router();
@@ -18,6 +19,7 @@ router.use("/users", isAuthorized, userRouter);
 router.use("/worklogs", isAuthorized, workLogRouter);
 router.use("/invoices", isAuthorized, invoiceRouter);
 router.use("/permissions", isAuthorized, permissionRouter);
+router.use("/events", isAuthorized, eventRouter);
 
 
 
