@@ -4,10 +4,10 @@ import bcrypt from "bcryptjs";
 import { UserRole } from "../enum";
 export const createUser = async () => {
   const userRepo = AppDataSource.getRepository(User);
-  const email = "ashish@gmail.com";
-  const name = "ashish";
-  const password = "ashish@123";
-  const role = UserRole.CLIENT
+  const email = "root@gmail.com";
+  const name = "root";
+  const password = "root@123";
+  const role = UserRole.ROOT
   const checkIfExists = await userRepo.findOne({ where: { email: email } });
   if (!checkIfExists) {
     await userRepo
