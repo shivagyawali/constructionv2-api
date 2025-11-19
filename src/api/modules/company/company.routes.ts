@@ -17,6 +17,8 @@ router.use((req, res, next) => {
 
   authorize(resource, action)(req, res, next);
 });
+
+router.get("/list", CompanyController.getAllCompanies);
 router.post("/register", CompanyController.registerCompany);
 
 export default router;

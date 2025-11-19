@@ -3,10 +3,14 @@ import bcrypt from "bcryptjs";
 import { validate, ValidationError } from "class-validator";
 import { Company } from "../../../entity/Company";
 import { User } from "../../../entity/User";
-import { ApiError } from "../../helpers/Utils/ApiError";
+import { ApiError, ForbiddenError } from "../../helpers/Utils/ApiError";
 import { UserRole } from "../../enum";
+import { constructWhereConditions } from "../../helpers/Utils/constructWhereConditions";
+import { paginate } from "../../helpers/Utils/paginate";
 
 export class CompanyService {
+  private companyRepository = AppDataSource.getRepository(Company);
+
   static async registerCompany(
     res:any,
     name:any,
@@ -75,4 +79,31 @@ export class CompanyService {
       };
     });
   }
+
+  getAllCompanies = async (
+      req?: any,
+      res?: Response,
+      page: number = 1,
+      filters: { [key: string]: any } = {}
+    ) => {
+      const { user: { role,isSubAccount, companyId } = {} } = req || {};
+        if (role !== UserRole.ROOT && role !== UserRole.CLIENT && isSubAccount) {
+          throw new ForbiddenError(
+            "You don't have access to view this page"
+          );
+        }
+      let where = {
+        ...constructWhereConditions(filters),
+        ...(role === UserRole.CLIENT && { id: companyId }),
+      };
+  
+      const [results, count] = await this.companyRepository.findAndCount({
+        where,
+        relations: ["tasks", "projects"],
+        skip: (page - 1) * 10,
+        take: 10,
+        order: { createdAt: "DESC" },
+      });
+      return { ...paginate(page, count), results, count };
+    };
 }
