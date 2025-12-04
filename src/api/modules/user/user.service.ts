@@ -21,12 +21,13 @@ export class UserService {
       role: data.role,
       isSubAccount: true,
       isPasswordChangeRequired: true,
-      isActive: true,
+      isActive: false,
       company: data?.company,
     });
 
     //send email with random password
     await sendEmail("DEFAULT_PASSWORD", data.email, {
+      email:data.email,
       name: data.name,
       password: password,
     });

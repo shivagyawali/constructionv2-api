@@ -3,43 +3,40 @@ import { defaultConfig } from "../../config/defaultConfig";
 import { EmailTemplate } from "../../entity/EmailTemplate";
 import nodemailer from "nodemailer";
 import { NotFoundError } from "./Utils/ApiError";
+import ejs from "ejs";
 
+export async function sendEmail(eventType: string, to: any, variables: any) {
+  const emailRepo = AppDataSource.getRepository(EmailTemplate);
 
-const replaceVariables = (
-  template: string,
-  variables: Record<string, string>
-) => {
-  return template.replace(
-    /\{\{(.*?)\}\}/g,
-    (_, key) => variables[key.trim()] || ""
-  );
-};
-export async function sendEmail(eventType: string, to: any, variables:any) {
+  // 1. Fetch template
+  const emailTemplate = await emailRepo.findOne({
+    where: { event: eventType },
+  });
 
-    const emailRepo = AppDataSource.getRepository(EmailTemplate);
+  if (!emailTemplate) throw new NotFoundError("Email template not found");
 
-    const emailTemplate = await emailRepo.findOne({
-      where: { event: eventType },
-    });
-    if (!emailTemplate) throw new NotFoundError("Email template not found");
-    const htmlContent = replaceVariables(emailTemplate.htmlContent, variables);
-    // Configure Nodemailer Transporter
-    const transporter = nodemailer.createTransport({
-      // @ts-ignore
-      host: defaultConfig.mail.host,
-      port: defaultConfig.mail.port,
-      secure: false,
-      auth: {
-        user: defaultConfig.mail.user,
-        pass: defaultConfig.mail.password,
-      },
-    });
+  // 2. Render EJS template from the stored HTML string
+  const htmlContent = await ejs.render(emailTemplate.htmlContent, variables);
 
-    const mailOptions = {
-      from: defaultConfig.mail.sender,
-      to,
-      subject: emailTemplate.subject,
-      html: htmlContent,
-    };
-    await transporter.sendMail(mailOptions);
+  // 3. Configure Nodemailer
+  const transporter = nodemailer.createTransport({
+    // @ts-ignore
+    host: defaultConfig.mail.host,
+    port: defaultConfig.mail.port,
+    secure: false,
+    auth: {
+      user: defaultConfig.mail.user,
+      pass: defaultConfig.mail.password,
+    },
+  });
+
+  // 4. Send email
+  const mailOptions = {
+    from: defaultConfig.mail.sender,
+    to,
+    subject: emailTemplate.subject,
+    html: htmlContent,
+  };
+
+  await transporter.sendMail(mailOptions);
 }
