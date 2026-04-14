@@ -68,7 +68,6 @@ async function bootstrap() {
     app.listen(PORT, () => {
       console.log(`🚀 Buildersoft API running at http://localhost:${PORT}`);
       console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
-      console.log(`✅ Allowed CORS origins:`, corsOriginsEnv);
     });
   } catch (err) {
     console.error("❌ Failed to start:", err);
