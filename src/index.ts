@@ -12,29 +12,32 @@ import { AppDataSource } from "./config/data-source";
 import routes from "./routes/index";
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 4000;   // ← updated to match your .env
+
+// ── Load Allowed Origins from .env (best practice) ───────────────
+const corsOriginsEnv = process.env.CORS_ORIGINS
+  ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim())
+  : [
+      "https://cms.buildersoft.ca",
+      process.env.APP_URL || "http://localhost:3000",   // ← uses your APP_URL
+      "http://localhost:5173",
+      "http://127.0.0.1:5173",
+      // You can add more here if needed
+    ];
 
 // ── Security & Utilities ─────────────────────────────────────────
 app.use(helmet());
 
-const allowedOrigins = [
-  "https://cms.buildersoft.ca",
-  "http://localhost:3000",
-  "http://localhost:5173",
-  "http://127.0.0.1:5173",
-  // Add any other origins you need (e.g. your local IP for mobile testing)
-  // "http://192.168.1.100:5173",
-];
-
 app.use(
   cors({
     origin: (origin, callback) => {
-      // ← Debug log (you can remove this line after you confirm the origin)
-      console.log("📡 Request Origin:", origin);
+      // Debug log (remove after you confirm it's working)
+      console.log("📡 Request Origin received:", origin);
 
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin || corsOriginsEnv.includes(origin)) {
         callback(null, true);
       } else {
+        console.error(`❌ CORS blocked origin: ${origin}`);
         callback(new Error("Not allowed by CORS"));
       }
     },
@@ -47,7 +50,7 @@ app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
 // ── Rate Limiting ─────────────────────────────────────────────────
 app.use(rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
+  windowMs: 15 * 60 * 1000,
   max: 200,
   message: { success: false, message: "Too many requests, please try again later." },
 }));
@@ -82,6 +85,7 @@ async function bootstrap() {
     app.listen(PORT, () => {
       console.log(`🚀 Buildersoft API running at http://localhost:${PORT}`);
       console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
+      console.log(`✅ Allowed CORS origins:`, corsOriginsEnv);
     });
   } catch (err) {
     console.error("❌ Failed to start:", err);
