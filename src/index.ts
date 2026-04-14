@@ -16,15 +16,22 @@ const PORT = process.env.PORT || 3000;
 
 // ── Security & Utilities ─────────────────────────────────────────
 app.use(helmet());
+
 const allowedOrigins = [
   "https://cms.buildersoft.ca",
   "http://localhost:3000",
   "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  // Add any other origins you need (e.g. your local IP for mobile testing)
+  // "http://192.168.1.100:5173",
 ];
 
 app.use(
   cors({
     origin: (origin, callback) => {
+      // ← Debug log (you can remove this line after you confirm the origin)
+      console.log("📡 Request Origin:", origin);
+
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -34,6 +41,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
 
