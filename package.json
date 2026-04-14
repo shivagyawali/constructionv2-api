@@ -1,5 +1,5 @@
 {
-  "name": "buildersoft-api",
+  "name": "builder-soft-api",
   "version": "1.0.0",
   "description": "Buildersoft Construction Management API",
   "main": "dist/index.js",
