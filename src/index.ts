@@ -15,35 +15,18 @@ const app = express();
 const PORT = process.env.PORT || 4000;   // ← updated to match your .env
 
 // ── Load Allowed Origins from .env (best practice) ───────────────
-const corsOriginsEnv = process.env.CORS_ORIGINS
-  ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim())
-  : [
-      "https://cms.buildersoft.ca",
-      process.env.APP_URL || "http://localhost:3000",   // ← uses your APP_URL
-      "http://localhost:5173",
-      "http://127.0.0.1:5173",
-      // You can add more here if needed
-    ];
+  const corsOptions = {
+    origin: "*", 
+    credentials: true,
+  };  
+
+// ── CORS ──────────────────────────────────────────────────────────
+app.use(cors(corsOptions));
 
 // ── Security & Utilities ─────────────────────────────────────────
 app.use(helmet());
 
-app.use(
-  cors({
-    origin: (origin, callback) => {
-      // Debug log (remove after you confirm it's working)
-      console.log("📡 Request Origin received:", origin);
 
-      if (!origin || corsOriginsEnv.includes(origin)) {
-        callback(null, true);
-      } else {
-        console.error(`❌ CORS blocked origin: ${origin}`);
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
 
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
