@@ -1,22 +1,21 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
 import dotenv from "dotenv";
-
+import { defaultConfig } from "./defaultConfig";
+import path from "path";
 dotenv.config();
 
+const syncDB = false;
+//MySQL database connection
 export const AppDataSource = new DataSource({
   type: "mysql",
-  host: process.env.MYSQL_HOST || "localhost",
-  port: Number(process.env.MYSQL_PORT) || 3306,
-  username: process.env.MYSQL_USERNAME || "root",
-  password: process.env.MYSQL_PASSWORD || "password",
-  database: process.env.MYSQL_DATABASE || "buildersoft",
-  synchronize: process.env.NODE_ENV === "development",
-  logging: process.env.NODE_ENV === "development",
-  entities: [__dirname + "/../entities/*.entity.{ts,js}"],
-  migrations: [__dirname + "/../migrations/*.{ts,js}"],
-  subscribers: [],
-  charset: "utf8mb4_unicode_ci",
-  timezone: "Z",
+  host: defaultConfig.database.host,
+  port: Number(defaultConfig.database.port),
+  username: defaultConfig.database.username,
+  password: defaultConfig.database.password,
+  database: defaultConfig.database.database,
+  entities: syncDB ?  [path.join(__dirname, ".." + "/entities/*.{ts,js}")]: [],
+  synchronize: syncDB,
+  logging: syncDB,
 });
 
