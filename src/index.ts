@@ -12,21 +12,37 @@ import { AppDataSource } from "./config/data-source";
 import routes from "./routes/index";
 
 const app = express();
-const PORT = process.env.PORT || 4000;   // ← updated to match your .env
+const PORT = process.env.PORT || 4000;
 
-// ── Load Allowed Origins from .env (best practice) ───────────────
-  const corsOptions = {
-    origin: "*", 
-    credentials: true,
-  };  
-
-// ── CORS ──────────────────────────────────────────────────────────
-app.use(cors(corsOptions));
+// ── Allowed Origins (MUST be exact - no "*" with credentials) ─────
+const allowedOrigins = [
+  "https://cms.buildersoft.ca",     // ← your production domain
+  "http://localhost:3000",          // ← your current frontend
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://127.0.0.1:3000",
+  // Add more here if needed (e.g. your mobile IP)
+];
 
 // ── Security & Utilities ─────────────────────────────────────────
 app.use(helmet());
 
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Debug log - you will see this in server console
+      console.log("📡 Request Origin:", origin);
 
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.error(`❌ CORS blocked origin: ${origin}`);
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,          // ← important for cookies / Authorization header
+  })
+);
 
 app.use(compression());
 app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev"));
@@ -68,6 +84,7 @@ async function bootstrap() {
     app.listen(PORT, () => {
       console.log(`🚀 Buildersoft API running at http://localhost:${PORT}`);
       console.log(`📋 Health check: http://localhost:${PORT}/api/health`);
+      console.log(`✅ Allowed CORS origins:`, allowedOrigins);
     });
   } catch (err) {
     console.error("❌ Failed to start:", err);
