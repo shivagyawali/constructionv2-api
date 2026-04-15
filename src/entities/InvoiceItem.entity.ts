@@ -21,32 +21,32 @@ export class InvoiceItem {
   description!: string;
 
   @Column({ type: "enum", enum: ItemType, default: ItemType.SERVICE })
-  itemType: ItemType;
+  itemType!: ItemType;
 
   @Column({ type: "decimal", precision: 10, scale: 2 })
-  quantity: number;
+  quantity!: number;
 
   @Column({ nullable: true })
-  unit: string;
+  unit!: string;
 
   @Column({ type: "decimal", precision: 12, scale: 2 })
-  unitPrice: number;
+  unitPrice!: number;
 
   @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
-  total: number;
+  total!: number;
 
   @Column({ type: "int", default: 0 })
-  sortOrder: number;
+  sortOrder!: number;
 
   @Column({ nullable: true })
-  workerLogId: string;
+  workerLogId!: string;
 
   @Column()
-  invoiceId: string;
+  invoiceId!: string;
 
   @ManyToOne(() => Invoice, (invoice) => invoice.items, { onDelete: "CASCADE" })
   @JoinColumn({ name: "invoiceId" })
-  invoice: Invoice;
+  invoice!: Invoice;
 
   @BeforeInsert()
   @BeforeUpdate()

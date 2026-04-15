@@ -26,63 +26,63 @@ export enum ProjectPriority {
 @Index(["clientId"])
 export class Project {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column({ type: "text", nullable: true })
-  description: string;
+  description!: string;
 
   @Column({ type: "enum", enum: ProjectStatus, default: ProjectStatus.PLANNING })
-  status: ProjectStatus;
+  status!: ProjectStatus;
 
   @Column({ type: "enum", enum: ProjectPriority, default: ProjectPriority.MEDIUM })
-  priority: ProjectPriority;
+  priority!: ProjectPriority;
 
   @Column({ type: "decimal", precision: 12, scale: 2, nullable: true })
-  budgetAmount: number;
+  budgetAmount!: number;
 
   @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
-  spentAmount: number;
+  spentAmount!: number;
 
   @Column({ nullable: true })
-  startDate: Date;
+  startDate!: Date;
 
   @Column({ nullable: true })
-  expectedEndDate: Date;
+  expectedEndDate!: Date;
 
   @Column({ nullable: true })
-  actualEndDate: Date;
+  actualEndDate!: Date;
 
   @Column({ type: "int", default: 0 })
-  progress: number;
+  progress!: number;
 
   @Column({ type: "text", nullable: true })
-  address: string;
+  address!: string;
 
   @Column({ type: "text", nullable: true })
-  notes: string;
+  notes!: string;
 
   @Column()
-  clientId: string;
+  clientId!: string;
 
   @ManyToOne(() => Client, (client) => client.projects, { onDelete: "RESTRICT" })
   @JoinColumn({ name: "clientId" })
-  client: Client;
+  client!: Client;
 
   @OneToMany(() => Task, (task) => task.project)
-  tasks: Task[];
+  tasks!: Task[];
 
   @OneToMany(() => Invoice, (invoice) => invoice.project)
-  invoices: Invoice[];
+  invoices!: Invoice[];
 
   @OneToMany(() => WorkerLog, (log) => log.project)
-  workerLogs: WorkerLog[];
+  workerLogs!: WorkerLog[];
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

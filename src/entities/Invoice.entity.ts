@@ -96,7 +96,7 @@ export class Invoice {
 
   @ManyToOne(() => Project, (project) => project.invoices, { onDelete: "RESTRICT" })
   @JoinColumn({ name: "projectId" })
-  projec!: Project;
+  project!: Project;
 
   @ManyToOne(() => User, (user) => user.invoices)
   @JoinColumn({ name: "createdById" })

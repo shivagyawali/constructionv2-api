@@ -23,51 +23,51 @@ export enum TaskPriority {
 @Index(["projectId"])
 export class Task {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column()
-  title: string;
+  title!: string;
 
   @Column({ type: "text", nullable: true })
-  description: string;
+  description!: string;
 
   @Column({ type: "enum", enum: TaskStatus, default: TaskStatus.TODO })
-  status: TaskStatus;
+  status!: TaskStatus;
 
   @Column({ type: "enum", enum: TaskPriority, default: TaskPriority.MEDIUM })
-  priority: TaskPriority;
+  priority!: TaskPriority;
 
   @Column({ type: "int", default: 0 })
-  progress: number;
+  progress!: number;
 
   @Column({ nullable: true })
-  startDate: Date;
+  startDate!: Date;
 
   @Column({ nullable: true })
-  dueDate: Date;
+  dueDate!: Date;
 
   @Column({ nullable: true })
-  completedAt: Date;
+  completedAt!: Date;
 
   @Column({ type: "decimal", precision: 10, scale: 2, nullable: true })
-  estimatedHours: number;
+  estimatedHours!: number;
 
   @Column({ type: "decimal", precision: 10, scale: 2, default: 0 })
-  loggedHours: number;
+  loggedHours!: number;
 
   @Column({ type: "text", nullable: true })
-  notes: string;
+  notes!: string;
 
   @Column()
-  projectId: string;
+  projectId!: string;
 
   @ManyToOne(() => Project, (project) => project.tasks, { onDelete: "CASCADE" })
   @JoinColumn({ name: "projectId" })
-  project: Project;
+  project!: Project;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }
