@@ -28,85 +28,85 @@ export enum InvoiceType {
 @Index(["clientId", "projectId"])
 export class Invoice {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column({ unique: true })
-  invoiceNumber: string;
+  invoiceNumber!: string;
 
   @Column({ type: "enum", enum: InvoiceStatus, default: InvoiceStatus.DRAFT })
-  status: InvoiceStatus;
+  status!: InvoiceStatus;
 
   @Column({ type: "enum", enum: InvoiceType, default: InvoiceType.STANDARD })
-  invoiceType: InvoiceType;
+  invoiceType!: InvoiceType;
 
   @Column({ type: "date" })
-  issueDate: string;
+  issueDate!: string;
 
   @Column({ type: "date" })
-  dueDate: string;
+  dueDate!: string;
 
   @Column({ nullable: true, type: "date" })
-  paidDate: string;
+  paidDate!: string;
 
   @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
-  subtotal: number;
+  subtotal!: number;
 
   @Column({ type: "decimal", precision: 5, scale: 2, default: 0 })
-  taxRate: number;
+  taxRate!: number;
 
   @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
-  taxAmount: number;
+  taxAmount!: number;
 
   @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
-  discount: number;
+  discount!: number;
 
   @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
-  totalAmount: number;
+  totalAmount!: number;
 
   @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
-  amountPaid: number;
+  amountPaid!: number;
 
   @Column({ type: "decimal", precision: 12, scale: 2, default: 0 })
-  amountDue: number;
+  amountDue!: number;
 
   @Column({ type: "text", nullable: true })
-  notes: string;
+  notes!: string;
 
   @Column({ type: "text", nullable: true })
-  terms: string;
+  terms!: string;
 
   @Column({ nullable: true })
-  sentAt: Date;
+  sentAt!: Date;
 
   @Column({ nullable: true })
-  reminderSentAt: Date;
+  reminderSentAt!: Date;
 
   @Column()
-  clientId: string;
+  clientId!: string;
 
   @Column()
-  projectId: string;
+  projectId!: string;
 
   @Column()
-  createdById: string;
+  createdById!: string;
 
   @ManyToOne(() => Client, (client) => client.invoices, { onDelete: "RESTRICT" })
   @JoinColumn({ name: "clientId" })
-  client: Client;
+  client!: Client;
 
   @ManyToOne(() => Project, (project) => project.invoices, { onDelete: "RESTRICT" })
   @JoinColumn({ name: "projectId" })
-  project: Project;
+  projec!: Project;
 
   @ManyToOne(() => User, (user) => user.invoices)
   @JoinColumn({ name: "createdById" })
-  createdBy: User;
+  createdBy!: User;
 
   @OneToMany(() => InvoiceItem, (item) => item.invoice, { cascade: true, eager: true })
-  items: InvoiceItem[];
+  items!: InvoiceItem[];
 
   @OneToMany(() => Payment, (payment) => payment.invoice)
-  payments: Payment[];
+  payments!: Payment[];
 
   @BeforeInsert()
   async generateInvoiceNumber() {
@@ -126,8 +126,8 @@ export class Invoice {
   }
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 }

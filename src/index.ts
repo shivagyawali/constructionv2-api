@@ -17,6 +17,7 @@ const PORT = process.env.PORT || 4000;
 // ── Allowed Origins (MUST be exact - no "*" with credentials) ─────
 const allowedOrigins = [
   "https://cms.buildersoft.ca",     // ← your production domain
+  "https://api.buildersoft.ca",     // ← your production domain
   "http://localhost:3000",          // ← your current frontend
   "http://localhost:5173",
   "http://127.0.0.1:5173",

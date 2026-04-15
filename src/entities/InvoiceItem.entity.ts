@@ -15,10 +15,10 @@ export enum ItemType {
 @Entity("invoice_items")
 export class InvoiceItem {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column()
-  description: string;
+  description!: string;
 
   @Column({ type: "enum", enum: ItemType, default: ItemType.SERVICE })
   itemType: ItemType;

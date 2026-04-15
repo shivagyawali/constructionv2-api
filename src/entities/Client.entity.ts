@@ -8,55 +8,55 @@ import { Invoice } from "./Invoice.entity";
 @Entity("clients")
 export class Client {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column()
-  firstName: string;
+  firstName!: string;
 
   @Column()
-  lastName: string;
+  lastName!: string;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column({ nullable: true })
-  phone: string;
+  phone!: string;
 
   @Column({ nullable: true })
-  company: string;
+  company!: string;
 
   @Column({ nullable: true })
-  address: string;
+  address!: string;
 
   @Column({ nullable: true })
-  city: string;
+  city!: string;
 
   @Column({ nullable: true })
-  province: string;
+  province!: string;
 
   @Column({ nullable: true })
-  postalCode: string;
+  postalCode!: string;
 
   @Column({ nullable: true })
-  country: string;
+  country!: string;
 
   @Column({ type: "text", nullable: true })
-  notes: string;
+  notes!: string;
 
   @Column({ default: true })
-  isActive: boolean;
+  isActive!: boolean;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @OneToMany(() => Project, (project) => project.client)
-  projects: Project[];
+  projects!: Project[];
 
   @OneToMany(() => Invoice, (invoice) => invoice.client)
-  invoices: Invoice[];
+  invoices!: Invoice[];
 
   get fullName(): string {
     return `${this.firstName} ${this.lastName}`;
