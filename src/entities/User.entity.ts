@@ -16,52 +16,52 @@ export enum UserRole {
 @Entity("users")
 export class User {
   @PrimaryGeneratedColumn("uuid")
-  id: string;
+  id!: string;
 
   @Column()
-  firstName: string;
+  firstName!: string;
 
   @Column()
-  lastName: string;
+  lastName!: string;
 
   @Column({ unique: true })
-  email: string;
+  email!: string;
 
   @Column({ select: false })
-  password: string;
+  password!: string;
 
   @Column({ type: "enum", enum: UserRole, default: UserRole.CONTRACTOR })
-  role: UserRole;
+  role!: UserRole;
 
   @Column({ nullable: true })
-  phone: string;
+  phone!: string;
 
   @Column({ nullable: true })
-  company: string;
+  company!: string;
 
   @Column({ nullable: true })
-  avatarUrl: string;
+  avatarUrl!: string;
 
   @Column({ default: true })
-  isActive: boolean;
+  isActive!: boolean;
 
   @Column({ nullable: true })
-  refreshToken: string;
+  refreshToken!: string;
 
   @Column({ nullable: true })
-  lastLoginAt: Date;
+  lastLoginAt!: Date;
 
   @CreateDateColumn()
-  createdAt: Date;
+  createdAt!: Date;
 
   @UpdateDateColumn()
-  updatedAt: Date;
+  updatedAt!: Date;
 
   @OneToMany(() => Invoice, (invoice) => invoice.createdBy)
-  invoices: Invoice[];
+  invoices!: Invoice[];
 
   @OneToMany(() => WorkerLog, (log) => log.createdBy)
-  workerLogs: WorkerLog[];
+  workerLogs!: WorkerLog[];
 
   @BeforeInsert()
   @BeforeUpdate()

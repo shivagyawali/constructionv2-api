@@ -14,8 +14,7 @@ export const AppDataSource = new DataSource({
   username: defaultConfig.database.username,
   password: defaultConfig.database.password,
   database: defaultConfig.database.database,
-  entities: syncDB ?  [path.join(__dirname, ".." + "/entities/*.{ts,js}")]: [],
+  entities: [path.join(__dirname, "../entities/**/*.{js,ts}")],
   synchronize: syncDB,
   logging: syncDB,
 });
-
