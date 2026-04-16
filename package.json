@@ -1,14 +1,12 @@
 {
-  "name": "builder-soft-api",
-  "version": "1.0.0",
-  "description": "Buildersoft Construction Management API",
+  "name": "buildersoft-api",
+  "version": "2.0.0",
+  "description": "Buildersoft Construction Management API — Clean & Scalable",
   "main": "dist/index.js",
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-     "build": "rimraf ./dist && tsc -p .",
-    "build:dev": "rimraf ./dist && tsc -p .",
-    "start": "node --optimize_for_size --max_old_space_size=512 --gc_interval=100 -- node_modules/ts-node/dist/bin -P tsconfig.json src/index.ts",
-    "serve": "rimraf ./dist && tsc -p . && node dist/index.js",
+    "build": "rimraf ./dist && tsc -p .",
+    "start": "node dist/index.js",
     "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
     "migration:generate": "npm run typeorm -- migration:generate -d src/config/data-source.ts",
     "migration:run": "npm run typeorm -- migration:run -d src/config/data-source.ts",
@@ -30,7 +28,8 @@
     "pdfkit": "^0.15.0",
     "date-fns": "^3.6.0",
     "morgan": "^1.10.0",
-    "compression": "^1.7.4"
+    "compression": "^1.7.4",
+    "rimraf": "^5.0.5"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",

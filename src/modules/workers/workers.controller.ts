@@ -3,7 +3,7 @@ import { AppDataSource } from "../../config/data-source";
 import { Worker } from "../../entities/Worker.entity";
 import { WorkerLog } from "../../entities/WorkerLog.entity";
 import { AuthRequest } from "../../middleware/auth.middleware";
-import { success, created, error, paginate } from "../../utils/response";
+import { sendSuccess, sendCreated, sendError, sendPaginated } from "../../utils/response";
 
 export class WorkersController {
   list = async (req: AuthRequest, res: Response) => {
@@ -11,49 +11,44 @@ export class WorkersController {
       const repo = AppDataSource.getRepository(Worker);
       const limit = Math.min(Number(req.query.limit) || 20, 100);
       const offset = Number(req.query.offset) || 0;
-      const { status, trade, search } = req.query;
+      const { status, role, search } = req.query;
 
       const qb = repo.createQueryBuilder("w");
       if (status) qb.andWhere("w.status = :status", { status });
-      if (trade) qb.andWhere("w.trade = :trade", { trade });
-      if (search) {
-        qb.andWhere("w.firstName LIKE :s OR w.lastName LIKE :s OR w.email LIKE :s", { s: `%${search}%` });
-      }
+      if (role) qb.andWhere("w.role = :role", { role });
+      if (search) qb.andWhere("(w.firstName LIKE :s OR w.lastName LIKE :s OR w.email LIKE :s)", { s: `%${search}%` });
 
       qb.orderBy("w.firstName", "ASC").skip(offset).take(limit);
       const [data, total] = await qb.getManyAndCount();
-      return paginate(res, data, total, limit, offset);
+      return sendPaginated(res, data, total, limit, offset);
     } catch (e: any) {
-      return error(res, e.message, 500);
+      return sendError(res, e.message, 500);
     }
   };
 
   create = async (req: AuthRequest, res: Response) => {
     try {
       const repo = AppDataSource.getRepository(Worker);
-      const { firstName, lastName, email, phone, trade, hourlyRate, overtimeRate, licenseNumber, licenseExpiry, hiredAt, notes, emergencyContact, emergencyPhone } = req.body;
-
-      if (!firstName || !lastName || !email) return error(res, "firstName, lastName and email are required");
+      const { firstName, lastName, email, phone, role, status, hourlyRate, overtimeRate, notes, emergencyContact, emergencyPhone, hiredAt } = req.body;
 
       const exists = await repo.findOne({ where: { email } });
-      if (exists) return error(res, "Email already registered", 409);
+      if (exists) return sendError(res, "Email already registered", 409);
 
-      const worker = repo.create({ firstName, lastName, email, phone, trade, hourlyRate, overtimeRate, licenseNumber, licenseExpiry, hiredAt, notes, emergencyContact, emergencyPhone });
+      const worker = repo.create({ firstName, lastName, email, phone, role, status, hourlyRate, overtimeRate, notes, emergencyContact, emergencyPhone, hiredAt });
       await repo.save(worker);
-      return created(res, worker);
+      return sendCreated(res, worker);
     } catch (e: any) {
-      return error(res, e.message, 500);
+      return sendError(res, e.message, 500);
     }
   };
 
   getOne = async (req: AuthRequest, res: Response) => {
     try {
-      const repo = AppDataSource.getRepository(Worker);
-      const worker = await repo.findOne({ where: { id: req.params.id } });
-      if (!worker) return error(res, "Worker not found", 404);
-      return success(res, worker);
+      const worker = await AppDataSource.getRepository(Worker).findOne({ where: { id: req.params.id } });
+      if (!worker) return sendError(res, "Worker not found", 404);
+      return sendSuccess(res, worker);
     } catch (e: any) {
-      return error(res, e.message, 500);
+      return sendError(res, e.message, 500);
     }
   };
 
@@ -61,14 +56,14 @@ export class WorkersController {
     try {
       const repo = AppDataSource.getRepository(Worker);
       const worker = await repo.findOne({ where: { id: req.params.id } });
-      if (!worker) return error(res, "Worker not found", 404);
+      if (!worker) return sendError(res, "Worker not found", 404);
 
-      const allowed = ["firstName", "lastName", "phone", "trade", "status", "hourlyRate", "overtimeRate", "licenseNumber", "licenseExpiry", "notes", "emergencyContact", "emergencyPhone"];
-      allowed.forEach((k) => { if (req.body[k] !== undefined) (worker as any)[k] = req.body[k]; });
+      const fields = ["firstName","lastName","phone","role","status","hourlyRate","overtimeRate","notes","emergencyContact","emergencyPhone","hiredAt"];
+      fields.forEach((k) => { if (req.body[k] !== undefined) (worker as any)[k] = req.body[k]; });
       await repo.save(worker);
-      return success(res, worker, "Worker updated");
+      return sendSuccess(res, worker, "Worker updated");
     } catch (e: any) {
-      return error(res, e.message, 500);
+      return sendError(res, e.message, 500);
     }
   };
 
@@ -76,11 +71,11 @@ export class WorkersController {
     try {
       const repo = AppDataSource.getRepository(Worker);
       const worker = await repo.findOne({ where: { id: req.params.id } });
-      if (!worker) return error(res, "Worker not found", 404);
+      if (!worker) return sendError(res, "Worker not found", 404);
       await repo.remove(worker);
-      return success(res, null, "Worker deleted");
+      return sendSuccess(res, null, "Worker deleted");
     } catch (e: any) {
-      return error(res, e.message, 500);
+      return sendError(res, e.message, 500);
     }
   };
 
@@ -88,47 +83,38 @@ export class WorkersController {
     try {
       const { id } = req.params;
       const worker = await AppDataSource.getRepository(Worker).findOne({ where: { id } });
-      if (!worker) return error(res, "Worker not found", 404);
+      if (!worker) return sendError(res, "Worker not found", 404);
 
       const { from, to } = req.query;
-      let dateFilter = "";
+      let dateClause = "";
       const params: any[] = [id];
-      if (from) { dateFilter += " AND logDate >= ?"; params.push(from); }
-      if (to) { dateFilter += " AND logDate <= ?"; params.push(to); }
+      if (from) { dateClause += " AND logDate >= ?"; params.push(from); }
+      if (to) { dateClause += " AND logDate <= ?"; params.push(to); }
 
       const [overall, byProject, recent] = await Promise.all([
         AppDataSource.query(
-          `SELECT
-            COUNT(*) as totalLogs,
-            COALESCE(SUM(hoursWorked), 0) as totalHours,
-            COALESCE(SUM(overtimeHours), 0) as totalOvertime,
-            COALESCE(SUM(totalCost), 0) as totalCost,
-            COUNT(DISTINCT projectId) as projectCount
-          FROM worker_logs WHERE workerId = ? AND status != 'rejected'${dateFilter}`,
-          params
+          `SELECT COUNT(*) as totalLogs, COALESCE(SUM(hoursWorked),0) as totalHours,
+           COALESCE(SUM(overtimeHours),0) as totalOvertime, COALESCE(SUM(totalCost),0) as totalCost,
+           COUNT(DISTINCT projectId) as projectCount
+           FROM worker_logs WHERE workerId = ? AND status != 'rejected'${dateClause}`, params
         ),
         AppDataSource.query(
-          `SELECT p.name as projectName, wl.projectId,
-            SUM(wl.hoursWorked) as hours, SUM(wl.totalCost) as cost, COUNT(*) as logs
-          FROM worker_logs wl
-          JOIN projects p ON p.id = wl.projectId
-          WHERE wl.workerId = ? AND wl.status != 'rejected'${dateFilter}
-          GROUP BY wl.projectId, p.name ORDER BY hours DESC`,
-          params
+          `SELECT p.name as projectName, wl.projectId, SUM(wl.hoursWorked) as hours,
+           SUM(wl.overtimeHours) as overtime, SUM(wl.totalCost) as cost, COUNT(*) as logs
+           FROM worker_logs wl JOIN projects p ON p.id = wl.projectId
+           WHERE wl.workerId = ? AND wl.status != 'rejected'${dateClause}
+           GROUP BY wl.projectId, p.name ORDER BY hours DESC`, params
         ),
         AppDataSource.query(
-          `SELECT wl.*, p.name as projectName
-          FROM worker_logs wl
-          JOIN projects p ON p.id = wl.projectId
-          WHERE wl.workerId = ?
-          ORDER BY wl.logDate DESC LIMIT 10`,
-          [id]
+          `SELECT wl.*, p.name as projectName FROM worker_logs wl
+           JOIN projects p ON p.id = wl.projectId WHERE wl.workerId = ?
+           ORDER BY wl.logDate DESC LIMIT 10`, [id]
         ),
       ]);
 
-      return success(res, {
+      return sendSuccess(res, {
         worker,
-        overall: {
+        summary: {
           totalLogs: Number(overall[0].totalLogs),
           totalHours: Number(overall[0].totalHours),
           totalOvertime: Number(overall[0].totalOvertime),
@@ -139,7 +125,7 @@ export class WorkersController {
         recentLogs: recent,
       });
     } catch (e: any) {
-      return error(res, e.message, 500);
+      return sendError(res, e.message, 500);
     }
   };
 
@@ -160,9 +146,9 @@ export class WorkersController {
 
       qb.orderBy("wl.logDate", "DESC").skip(offset).take(limit);
       const [data, total] = await qb.getManyAndCount();
-      return paginate(res, data, total, limit, offset);
+      return sendPaginated(res, data, total, limit, offset);
     } catch (e: any) {
-      return error(res, e.message, 500);
+      return sendError(res, e.message, 500);
     }
   };
 }

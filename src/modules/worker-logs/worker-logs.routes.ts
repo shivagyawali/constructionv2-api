@@ -1,26 +1,28 @@
 import { Router } from "express";
+import { body } from "express-validator";
 import { WorkerLogsController } from "./worker-logs.controller";
 import { authenticate } from "../../middleware/auth.middleware";
+import { validate } from "../../middleware/validate.middleware";
 
 const router = Router();
 const ctrl = new WorkerLogsController();
 
 router.use(authenticate);
-
-// CRUD
 router.get("/", ctrl.list);
-router.post("/", ctrl.create);
-router.get("/summary", ctrl.summary);
+router.post("/",
+  validate([
+    body("workerId").isUUID().withMessage("Valid workerId is required"),
+    body("projectId").isUUID().withMessage("Valid projectId is required"),
+    body("logDate").isDate().withMessage("Valid logDate is required"),
+    body("hoursWorked").isNumeric().withMessage("hoursWorked must be a number"),
+  ]),
+  ctrl.create
+);
 router.get("/:id", ctrl.getOne);
 router.patch("/:id", ctrl.update);
 router.delete("/:id", ctrl.remove);
-
-// Workflow
-router.patch("/:id/approve", ctrl.approve);
-router.patch("/:id/reject", ctrl.reject);
-
-// Bulk
-router.post("/bulk", ctrl.bulkCreate);
-router.post("/bulk-approve", ctrl.bulkApprove);
+router.post("/:id/approve", ctrl.approve);
+router.post("/:id/reject", ctrl.reject);
+router.post("/bulk/approve", ctrl.bulkApprove);
 
 export default router;

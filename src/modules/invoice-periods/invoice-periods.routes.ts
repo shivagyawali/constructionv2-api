@@ -1,25 +1,25 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import { ClientsController } from "./clients.controller";
+import { InvoicePeriodsController } from "./invoice-periods.controller";
 import { authenticate } from "../../middleware/auth.middleware";
 import { validate } from "../../middleware/validate.middleware";
 
 const router = Router();
-const ctrl = new ClientsController();
+const ctrl = new InvoicePeriodsController();
 
 router.use(authenticate);
-
 router.get("/", ctrl.list);
+router.get("/summary", ctrl.summary);
 router.post("/",
   validate([
-    body("firstName").notEmpty().withMessage("First name is required"),
-    body("lastName").notEmpty().withMessage("Last name is required"),
-    body("email").isEmail().withMessage("Valid email is required"),
+    body("workerId").isUUID().withMessage("Valid workerId is required"),
+    body("startDate").isDate().withMessage("Valid startDate is required"),
+    body("endDate").isDate().withMessage("Valid endDate is required"),
+    body("regularHours").isNumeric().withMessage("regularHours must be a number"),
   ]),
   ctrl.create
 );
 router.get("/:id", ctrl.getOne);
-router.get("/:id/stats", ctrl.stats);
 router.patch("/:id", ctrl.update);
 router.delete("/:id", ctrl.remove);
 

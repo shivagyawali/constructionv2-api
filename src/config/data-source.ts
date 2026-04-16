@@ -1,20 +1,17 @@
 import "reflect-metadata";
 import { DataSource } from "typeorm";
-import dotenv from "dotenv";
-import { defaultConfig } from "./defaultConfig";
 import path from "path";
-dotenv.config();
+import { env } from "./env";
 
-const syncDB = false;
-//MySQL database connection
 export const AppDataSource = new DataSource({
   type: "mysql",
-  host: defaultConfig.database.host,
-  port: Number(defaultConfig.database.port),
-  username: defaultConfig.database.username,
-  password: defaultConfig.database.password,
-  database: defaultConfig.database.database,
+  host: env.db.host,
+  port: env.db.port,
+  username: env.db.username,
+  password: env.db.password,
+  database: env.db.database,
   entities: [path.join(__dirname, "../entities/**/*.{js,ts}")],
-  synchronize: syncDB,
-  logging: syncDB,
+  synchronize: env.isDev,
+  logging: false,
+  extra: { connectionLimit: 10, connectTimeout: 30000 },
 });
