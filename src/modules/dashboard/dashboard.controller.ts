@@ -80,10 +80,10 @@ export class DashboardController {
           cidP,
         ),
         AppDataSource.query(
-          `SELECT SUM(status='todo') as todo, SUM(status='in_progress') as in_progress,
-           SUM(status='review') as review, SUM(status='done') as done,
-           SUM(status='cancelled') as cancelled, COUNT(*) as total,
-           ROUND(AVG(progress),1) as avgProgress
+          `SELECT SUM(t.status='todo') as todo, SUM(t.status='in_progress') as in_progress,
+           SUM(t.status='review') as review, SUM(t.status='done') as done,
+           SUM(t.status='cancelled') as cancelled, COUNT(*) as total,
+           ROUND(AVG(t.progress),1) as avgProgress
            FROM tasks t
            INNER JOIN projects p ON p.id = t.projectId
            WHERE 1=1 ${cidQ ? "AND p.companyId = ?" : ""}`,
