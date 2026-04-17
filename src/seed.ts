@@ -36,7 +36,7 @@ async function seed() {
 
   // ── 1. SuperAdmin ──────────────────────────────────────────────────────────
   const SA_EMAIL    = process.env.SUPERADMIN_EMAIL    ?? "services.shivagyawali@gmail.com";
-  const SA_PASSWORD = process.env.SUPERADMIN_PASSWORD ?? "SuperAdmin@123";
+  const SA_PASSWORD = process.env.SUPERADMIN_PASSWORD ?? "iloveDATA@123";
 
   let superAdmin = await userRepo.findOne({ where: { email: SA_EMAIL } });
   if (!superAdmin) {
