@@ -4,12 +4,19 @@ export const notFound = (req: Request, res: Response) => {
   res.status(404).json({ success: false, message: `Route ${req.method} ${req.path} not found` });
 };
 
-export const globalErrorHandler = (err: any, req: Request, res: Response, next: NextFunction) => {
-  console.error("[ERROR]", err.message, err.stack);
-  const statusCode = err.statusCode || err.status || 500;
-  res.status(statusCode).json({
+export const globalErrorHandler = (
+  err: any, _req: Request, res: Response, _next: NextFunction
+) => {
+  const status = err.status || err.statusCode || 500;
+  const message = err.message || "Internal server error";
+
+  if (process.env.APP_ENV !== "production") {
+    console.error("[ERROR]", err);
+  }
+
+  res.status(status).json({
     success: false,
-    message: err.message || "Internal server error",
-    ...(process.env.APP_ENV === "development" && { stack: err.stack }),
+    message,
+    ...(process.env.APP_ENV !== "production" && { stack: err.stack }),
   });
 };

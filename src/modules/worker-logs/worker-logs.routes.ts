@@ -1,13 +1,14 @@
 import { Router } from "express";
 import { body } from "express-validator";
 import { WorkerLogsController } from "./worker-logs.controller";
-import { authenticate } from "../../middleware/auth.middleware";
+import { authenticate, authorize } from "../../middleware/auth.middleware";
 import { validate } from "../../middleware/validate.middleware";
 
 const router = Router();
 const ctrl = new WorkerLogsController();
 
 router.use(authenticate);
+
 router.get("/", ctrl.list);
 router.post("/",
   validate([
@@ -20,9 +21,9 @@ router.post("/",
 );
 router.get("/:id", ctrl.getOne);
 router.patch("/:id", ctrl.update);
-router.delete("/:id", ctrl.remove);
-router.post("/:id/approve", ctrl.approve);
-router.post("/:id/reject", ctrl.reject);
-router.post("/bulk/approve", ctrl.bulkApprove);
+router.delete("/:id", authorize("admin", "manager", "supervisor"), ctrl.remove);
+router.post("/bulk/approve", authorize("admin", "manager", "supervisor"), ctrl.bulkApprove);
+router.post("/:id/approve", authorize("admin", "manager", "supervisor"), ctrl.approve);
+router.post("/:id/reject", authorize("admin", "manager", "supervisor"), ctrl.reject);
 
 export default router;

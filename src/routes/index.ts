@@ -1,5 +1,7 @@
 import { Router } from "express";
 import authRoutes from "../modules/auth/auth.routes";
+import usersRoutes from "../modules/users/users.routes";
+import rolesRoutes from "../modules/roles/roles.routes";
 import clientsRoutes from "../modules/clients/clients.routes";
 import projectsRoutes from "../modules/projects/projects.routes";
 import tasksRoutes from "../modules/tasks/tasks.routes";
@@ -7,6 +9,7 @@ import workersRoutes from "../modules/workers/workers.routes";
 import workerLogsRoutes from "../modules/worker-logs/worker-logs.routes";
 import invoicesRoutes from "../modules/invoices/invoices.routes";
 import invoicePeriodsRoutes from "../modules/invoice-periods/invoice-periods.routes";
+import dashboardRoutes from "../modules/dashboard/dashboard.routes";
 
 const router = Router();
 
@@ -15,6 +18,9 @@ router.get("/health", (_, res) =>
 );
 
 router.use("/auth", authRoutes);
+router.use("/users", usersRoutes);
+router.use("/role-permissions", rolesRoutes);
+router.use("/dashboard", dashboardRoutes);
 router.use("/clients", clientsRoutes);
 router.use("/projects", projectsRoutes);
 router.use("/tasks", tasksRoutes);

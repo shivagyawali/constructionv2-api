@@ -16,22 +16,35 @@ import { notFound, globalErrorHandler } from "./middleware/error.middleware";
 
 const app: Express = express();
 
-// ─── Security ─────────────────────────────────────────────────────────────────
-app.use(helmet());
+// ── Security ──────────────────────────────────────────────────────────────────
+app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
 app.set("trust proxy", 1);
+
+// General rate limit
 app.use(
   rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 300,
+    max: 500,
     standardHeaders: true,
     legacyHeaders: false,
     message: { success: false, message: "Too many requests, please try again later." },
+    skip: (req) => req.path === "/health",
   })
 );
 
-// ─── CORS ─────────────────────────────────────────────────────────────────────
+// Strict rate limit on auth
+app.use(
+  "/api/auth/login",
+  rateLimit({ windowMs: 15 * 60 * 1000, max: 20, message: { success: false, message: "Too many login attempts." } })
+);
+app.use(
+  "/api/auth/register",
+  rateLimit({ windowMs: 60 * 60 * 1000, max: 10, message: { success: false, message: "Too many registration attempts." } })
+);
+
+// ── CORS ──────────────────────────────────────────────────────────────────────
 const corsOptions: CorsOptions = {
-  origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+  origin: (origin, callback) => {
     if (!origin || env.isDev || env.corsOrigins.includes(origin)) return callback(null, true);
     callback(new Error(`Origin ${origin} not allowed by CORS`));
   },
@@ -44,23 +57,32 @@ const corsOptions: CorsOptions = {
 app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
-// ─── Middleware ────────────────────────────────────────────────────────────────
+// ── Body / Compression ────────────────────────────────────────────────────────
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(compression());
-app.use(env.isDev ? morgan("dev") : morgan("combined"));
 
-// ─── Routes ───────────────────────────────────────────────────────────────────
+// ── Logging ───────────────────────────────────────────────────────────────────
+if (env.isDev) {
+  app.use(morgan("dev"));
+} else {
+  app.use(morgan("combined", {
+    skip: (req) => req.path === "/health",
+  }));
+}
+
+// ── Routes ────────────────────────────────────────────────────────────────────
 app.use("/api", routes);
+
 app.get("/health", (_: Request, res: Response) =>
-  res.json({ status: "ok", env: env.nodeEnv, timestamp: new Date().toISOString() })
+  res.json({ status: "ok", env: env.nodeEnv, ts: new Date().toISOString() })
 );
 
-// ─── Error handling ───────────────────────────────────────────────────────────
+// ── Error handling ────────────────────────────────────────────────────────────
 app.use(notFound);
 app.use(globalErrorHandler);
 
-// ─── Bootstrap ────────────────────────────────────────────────────────────────
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
 async function bootstrap(): Promise<void> {
   try {
     await AppDataSource.initialize();
@@ -71,20 +93,21 @@ async function bootstrap(): Promise<void> {
   }
 
   app.listen(env.port, () => {
-    console.log(`🚀  Server running on port ${env.port} [${env.nodeEnv}]`);
+    console.log(`🚀  Buildersoft API running on port ${env.port} [${env.nodeEnv}]`);
     if (env.corsOrigins.length) console.log(`🌐  CORS: ${env.corsOrigins.join(", ")}`);
   });
 }
 
 bootstrap();
 
-// ─── Graceful shutdown ────────────────────────────────────────────────────────
-process.on("SIGTERM", async () => {
+// ── Graceful shutdown ──────────────────────────────────────────────────────────
+const shutdown = async (signal: string) => {
+  console.log(`\n${signal} received — shutting down gracefully`);
   if (AppDataSource.isInitialized) await AppDataSource.destroy();
   process.exit(0);
-});
-process.on("SIGINT", async () => {
-  if (AppDataSource.isInitialized) await AppDataSource.destroy();
-  process.exit(0);
-});
+};
+
+process.on("SIGTERM", () => shutdown("SIGTERM"));
+process.on("SIGINT", () => shutdown("SIGINT"));
 process.on("unhandledRejection", (reason) => console.error("Unhandled Rejection:", reason));
+process.on("uncaughtException", (err) => { console.error("Uncaught Exception:", err); process.exit(1); });

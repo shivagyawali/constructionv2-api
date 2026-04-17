@@ -11,7 +11,13 @@ export const AppDataSource = new DataSource({
   password: env.db.password,
   database: env.db.database,
   entities: [path.join(__dirname, "../entities/**/*.{js,ts}")],
-  synchronize: env.isDev,
-  logging: false,
-  extra: { connectionLimit: 10, connectTimeout: 30000 },
+  synchronize: env.isDev,    // auto-sync in dev — use migrations in prod
+  logging: env.isDev ? ["error", "warn"] : ["error"],
+  extra: {
+    connectionLimit: 10,
+    connectTimeout: 30000,
+    waitForConnections: true,
+    queueLimit: 0,
+  },
+  migrations: [path.join(__dirname, "../migrations/**/*.{js,ts}")],
 });

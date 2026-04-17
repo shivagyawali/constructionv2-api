@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { AppDataSource } from "../config/data-source";
 import { User } from "../entities/User.entity";
+import { RolePermission } from "../entities/RolePermission.entity";
 import { env } from "../config/env";
 
 export interface AuthRequest extends Request {
@@ -32,4 +33,23 @@ export const authorize = (...roles: string[]) =>
       return res.status(403).json({ success: false, message: "Forbidden: insufficient permissions" });
     }
     next();
+  };
+
+/** Route-level permission check using DB-stored role permissions */
+export const requireRouteAccess = (route: string) =>
+  async (req: AuthRequest, res: Response, next: NextFunction) => {
+    if (!req.user) return res.status(401).json({ success: false, message: "Unauthorized" });
+    if (req.user.role === "admin") return next(); // Admin always passes
+
+    try {
+      const perm = await AppDataSource.getRepository(RolePermission).findOne({
+        where: { role: req.user.role },
+      });
+      if (!perm || !perm.allowedRoutes.includes(route)) {
+        return res.status(403).json({ success: false, message: "Access to this section is not permitted for your role" });
+      }
+      next();
+    } catch {
+      next(); // Fail open on DB error
+    }
   };

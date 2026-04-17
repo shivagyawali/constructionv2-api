@@ -1,26 +1,27 @@
 import { Router } from "express";
 import { body } from "express-validator";
 import { ClientsController } from "./clients.controller";
-import { authenticate } from "../../middleware/auth.middleware";
+import { authenticate, authorize, requireRouteAccess } from "../../middleware/auth.middleware";
 import { validate } from "../../middleware/validate.middleware";
 
 const router = Router();
 const ctrl = new ClientsController();
+const access = requireRouteAccess("/clients");
 
-router.use(authenticate);
+router.use(authenticate, access);
 
 router.get("/", ctrl.list);
-router.post("/",
+router.post("/", authorize("admin", "manager"),
   validate([
-    body("firstName").notEmpty().withMessage("First name is required"),
-    body("lastName").notEmpty().withMessage("Last name is required"),
-    body("email").isEmail().withMessage("Valid email is required"),
+    body("firstName").notEmpty(),
+    body("lastName").notEmpty(),
+    body("email").isEmail(),
   ]),
   ctrl.create
 );
 router.get("/:id", ctrl.getOne);
+router.patch("/:id", authorize("admin", "manager"), ctrl.update);
+router.delete("/:id", authorize("admin"), ctrl.remove);
 router.get("/:id/stats", ctrl.stats);
-router.patch("/:id", ctrl.update);
-router.delete("/:id", ctrl.remove);
 
 export default router;

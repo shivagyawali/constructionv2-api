@@ -1,29 +1,30 @@
 import { Router } from "express";
 import { body } from "express-validator";
 import { InvoicesController } from "./invoices.controller";
-import { authenticate } from "../../middleware/auth.middleware";
+import { authenticate, authorize, requireRouteAccess } from "../../middleware/auth.middleware";
 import { validate } from "../../middleware/validate.middleware";
 
 const router = Router();
 const ctrl = new InvoicesController();
+const access = requireRouteAccess("/invoices");
 
-router.use(authenticate);
+router.use(authenticate, access);
+
 router.get("/", ctrl.list);
-router.post("/",
+router.post("/", authorize("admin", "manager"),
   validate([
-    body("clientId").isUUID().withMessage("Valid clientId is required"),
-    body("issueDate").isDate().withMessage("Valid issueDate is required"),
-    body("dueDate").isDate().withMessage("Valid dueDate is required"),
-    body("items").isArray({ min: 1 }).withMessage("At least one line item is required"),
+    body("clientId").notEmpty(),
+    body("issueDate").notEmpty(),
+    body("dueDate").notEmpty(),
   ]),
   ctrl.create
 );
 router.get("/:id", ctrl.getOne);
-router.patch("/:id", ctrl.update);
-router.delete("/:id", ctrl.remove);
-router.post("/:id/payments", ctrl.addPayment);
+router.patch("/:id", authorize("admin", "manager"), ctrl.update);
+router.delete("/:id", authorize("admin", "manager"), ctrl.remove);
+router.post("/:id/payments", authorize("admin", "manager"), ctrl.addPayment);
 router.get("/:id/payments", ctrl.listPayments);
-router.post("/:id/send", ctrl.markSent);
+router.patch("/:id/send", authorize("admin", "manager"), ctrl.markSent);
 router.get("/:id/pdf", ctrl.downloadPdf);
 
 export default router;
