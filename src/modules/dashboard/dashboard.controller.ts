@@ -7,22 +7,37 @@ export class DashboardController {
   overview = async (req: AuthRequest, res: Response) => {
     try {
       // Scope all queries to company (if not superadmin viewing all)
-      const cid  = req.companyId;
+      const cid = req.companyId;
       const cidQ = cid ? "AND companyId = ?" : "";
       const cidP = cid ? [cid] : [];
 
       const [
-        clientStats, projectStats, invoiceStats,
-        workerStats, recentProjects, recentInvoices,
-        monthlyRevenue, taskOverview,
+        clientStats,
+        projectStats,
+        invoiceStats,
+        workerStats,
+        recentProjects,
+        recentInvoices,
+        monthlyRevenue,
+        taskOverview,
       ] = await Promise.all([
-        AppDataSource.query(`SELECT COUNT(*) as total, SUM(isActive=1) as active FROM clients WHERE 1=1 ${cidQ}`, cidP),
         AppDataSource.query(
-          `SELECT COUNT(*) as total,
-           SUM(status='active') as active, SUM(status='planning') as planning,
-           SUM(status='completed') as completed, SUM(status='on_hold') as on_hold,
-           SUM(status='cancelled') as cancelled
-           FROM projects WHERE 1=1 ${cidQ}`, cidP
+          `SELECT COUNT(*) as total, SUM(isActive=1) as active FROM clients WHERE 1=1 ${cidQ}`,
+          cidP,
+        ),
+        AppDataSource.query(
+          `SELECT 
+    SUM(t.status='todo') as todo,
+    SUM(t.status='in_progress') as in_progress,
+    SUM(t.status='review') as review,
+    SUM(t.status='done') as done,
+    SUM(t.status='cancelled') as cancelled,
+    COUNT(*) as total,
+    ROUND(AVG(t.progress),1) as avgProgress
+   FROM tasks t
+   INNER JOIN projects p ON p.id = t.projectId
+   WHERE 1=1 ${cidQ ? "AND p.companyId = ?" : ""}`,
+          cid ? [cid] : [],
         ),
         AppDataSource.query(
           `SELECT COUNT(*) as total, SUM(status='paid') as paid,
@@ -30,12 +45,14 @@ export class DashboardController {
            COALESCE(SUM(CASE WHEN status='paid' THEN totalAmount ELSE 0 END),0) as totalRevenue,
            COALESCE(SUM(CASE WHEN status IN ('sent','viewed','partially_paid') THEN amountDue ELSE 0 END),0) as outstanding,
            COALESCE(SUM(CASE WHEN status='overdue' THEN amountDue ELSE 0 END),0) as overdue
-           FROM invoices WHERE 1=1 ${cidQ}`, cidP
+           FROM invoices WHERE 1=1 ${cidQ}`,
+          cidP,
         ),
         AppDataSource.query(
           `SELECT COUNT(*) as total, SUM(status='active') as active,
            SUM(status='inactive') as inactive, SUM(status='on_leave') as on_leave
-           FROM workers WHERE 1=1 ${cidQ}`, cidP
+           FROM workers WHERE 1=1 ${cidQ}`,
+          cidP,
         ),
         AppDataSource.query(
           `SELECT p.id, p.name, p.status, p.priority, p.progress, p.expectedEndDate,
@@ -43,7 +60,7 @@ export class DashboardController {
            FROM projects p LEFT JOIN clients c ON c.id = p.clientId
            WHERE 1=1 ${cidQ ? "AND p.companyId = ?" : ""}
            ORDER BY p.updatedAt DESC LIMIT 6`,
-          cid ? [cid] : []
+          cid ? [cid] : [],
         ),
         AppDataSource.query(
           `SELECT i.id, i.invoiceNumber, i.status, i.totalAmount, i.amountDue,
@@ -51,7 +68,7 @@ export class DashboardController {
            FROM invoices i LEFT JOIN clients c ON c.id = i.clientId
            WHERE 1=1 ${cidQ ? "AND i.companyId = ?" : ""}
            ORDER BY i.createdAt DESC LIMIT 6`,
-          cid ? [cid] : []
+          cid ? [cid] : [],
         ),
         AppDataSource.query(
           `SELECT DATE_FORMAT(issueDate,'%Y-%m') as month,
@@ -60,7 +77,7 @@ export class DashboardController {
            FROM invoices
            WHERE issueDate >= DATE_SUB(NOW(), INTERVAL 6 MONTH) ${cidQ}
            GROUP BY DATE_FORMAT(issueDate,'%Y-%m') ORDER BY month ASC`,
-          cidP
+          cidP,
         ),
         AppDataSource.query(
           `SELECT SUM(status='todo') as todo, SUM(status='in_progress') as in_progress,
@@ -70,44 +87,44 @@ export class DashboardController {
            FROM tasks t
            INNER JOIN projects p ON p.id = t.projectId
            WHERE 1=1 ${cidQ ? "AND p.companyId = ?" : ""}`,
-          cid ? [cid] : []
+          cid ? [cid] : [],
         ),
       ]);
 
       return sendSuccess(res, {
         clients: {
-          total:  Number(clientStats[0].total),
+          total: Number(clientStats[0].total),
           active: Number(clientStats[0].active),
         },
         projects: {
-          total:     Number(projectStats[0].total),
-          active:    Number(projectStats[0].active),
-          planning:  Number(projectStats[0].planning),
+          total: Number(projectStats[0].total),
+          active: Number(projectStats[0].active),
+          planning: Number(projectStats[0].planning),
           completed: Number(projectStats[0].completed),
-          on_hold:   Number(projectStats[0].on_hold),
+          on_hold: Number(projectStats[0].on_hold),
           cancelled: Number(projectStats[0].cancelled),
         },
         invoices: {
-          total:        Number(invoiceStats[0].total),
-          paid:         Number(invoiceStats[0].paid),
-          pending:      Number(invoiceStats[0].pending),
+          total: Number(invoiceStats[0].total),
+          paid: Number(invoiceStats[0].paid),
+          pending: Number(invoiceStats[0].pending),
           totalRevenue: Number(invoiceStats[0].totalRevenue),
-          outstanding:  Number(invoiceStats[0].outstanding),
-          overdue:      Number(invoiceStats[0].overdue),
+          outstanding: Number(invoiceStats[0].outstanding),
+          overdue: Number(invoiceStats[0].overdue),
         },
         workers: {
-          total:    Number(workerStats[0].total),
-          active:   Number(workerStats[0].active),
+          total: Number(workerStats[0].total),
+          active: Number(workerStats[0].active),
           inactive: Number(workerStats[0].inactive),
           on_leave: Number(workerStats[0].on_leave),
         },
         tasks: {
-          total:       Number(taskOverview[0].total),
-          todo:        Number(taskOverview[0].todo),
+          total: Number(taskOverview[0].total),
+          todo: Number(taskOverview[0].todo),
           in_progress: Number(taskOverview[0].in_progress),
-          review:      Number(taskOverview[0].review),
-          done:        Number(taskOverview[0].done),
-          cancelled:   Number(taskOverview[0].cancelled),
+          review: Number(taskOverview[0].review),
+          done: Number(taskOverview[0].done),
+          cancelled: Number(taskOverview[0].cancelled),
           avgProgress: Number(taskOverview[0].avgProgress),
         },
         recentProjects,
@@ -121,13 +138,22 @@ export class DashboardController {
 
   laborSummary = async (req: AuthRequest, res: Response) => {
     try {
-      const cid  = req.companyId;
+      const cid = req.companyId;
       const { from, to } = req.query;
       let clause = "1=1";
       const params: any[] = [];
-      if (from) { clause += " AND wl.logDate >= ?"; params.push(from); }
-      if (to)   { clause += " AND wl.logDate <= ?"; params.push(to);   }
-      if (cid)  { clause += " AND p.companyId = ?"; params.push(cid);  }
+      if (from) {
+        clause += " AND wl.logDate >= ?";
+        params.push(from);
+      }
+      if (to) {
+        clause += " AND wl.logDate <= ?";
+        params.push(to);
+      }
+      if (cid) {
+        clause += " AND p.companyId = ?";
+        params.push(cid);
+      }
 
       const [summary, byWorker, byProject] = await Promise.all([
         AppDataSource.query(
@@ -139,7 +165,8 @@ export class DashboardController {
            COUNT(DISTINCT wl.projectId) as projects
            FROM worker_logs wl
            INNER JOIN projects p ON p.id = wl.projectId
-           WHERE ${clause} AND wl.status != 'rejected'`, params
+           WHERE ${clause} AND wl.status != 'rejected'`,
+          params,
         ),
         AppDataSource.query(
           `SELECT w.id, w.firstName, w.lastName, w.role,
@@ -150,7 +177,8 @@ export class DashboardController {
            JOIN workers w ON w.id = wl.workerId
            INNER JOIN projects p ON p.id = wl.projectId
            WHERE ${clause} AND wl.status != 'rejected'
-           GROUP BY w.id ORDER BY hours DESC LIMIT 10`, params
+           GROUP BY w.id ORDER BY hours DESC LIMIT 10`,
+          params,
         ),
         AppDataSource.query(
           `SELECT p.id, p.name,
@@ -158,18 +186,19 @@ export class DashboardController {
            COALESCE(SUM(wl.totalCost),0) as cost, COUNT(*) as logs
            FROM worker_logs wl JOIN projects p ON p.id = wl.projectId
            WHERE ${clause} AND wl.status != 'rejected'
-           GROUP BY p.id ORDER BY hours DESC LIMIT 10`, params
+           GROUP BY p.id ORDER BY hours DESC LIMIT 10`,
+          params,
         ),
       ]);
 
       return sendSuccess(res, {
         summary: {
-          totalHours:    Number(summary[0].totalHours),
+          totalHours: Number(summary[0].totalHours),
           totalOvertime: Number(summary[0].totalOvertime),
-          totalCost:     Number(summary[0].totalCost),
-          totalLogs:     Number(summary[0].totalLogs),
-          workers:       Number(summary[0].workers),
-          projects:      Number(summary[0].projects),
+          totalCost: Number(summary[0].totalCost),
+          totalLogs: Number(summary[0].totalLogs),
+          workers: Number(summary[0].workers),
+          projects: Number(summary[0].projects),
         },
         byWorker,
         byProject,
