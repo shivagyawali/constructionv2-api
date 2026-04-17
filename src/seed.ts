@@ -35,7 +35,7 @@ async function seed() {
   const roleRepo    = AppDataSource.getRepository(RolePermission);
 
   // ── 1. SuperAdmin ──────────────────────────────────────────────────────────
-  const SA_EMAIL    = process.env.SUPERADMIN_EMAIL    ?? "superadmin@buildersoft.io";
+  const SA_EMAIL    = process.env.SUPERADMIN_EMAIL    ?? "superadmin@gmail.io";
   const SA_PASSWORD = process.env.SUPERADMIN_PASSWORD ?? "SuperAdmin@123";
 
   let superAdmin = await userRepo.findOne({ where: { email: SA_EMAIL } });
@@ -55,19 +55,19 @@ async function seed() {
   }
 
   // ── 2. Demo Company ────────────────────────────────────────────────────────
-  let company = await companyRepo.findOne({ where: { slug: "ironframe-construction" } });
+  let company = await companyRepo.findOne({ where: { slug: "buildersoft-construction" } });
   if (!company) {
     company = companyRepo.create({
-      name:         "Ironframe Construction",
-      slug:         "ironframe-construction",
-      email:        "admin@ironframe.com",
+      name:         "Buildersoft Construction",
+      slug:         "buildersoft-construction",
+      email:        "admin@gmail.com",
       phone:        "+1-555-0100",
       address:      "123 Builder Street",
       city:         "Toronto",
       province:     "Ontario",
       country:      "Canada",
       postalCode:   "M5H 2N2",
-      website:      "https://ironframe.com",
+      website:      "https://buildersoft.ca",
       description:  "Premium construction management services",
       status:       CompanyStatus.ACTIVE,
       plan:         CompanyPlan.PRO,
@@ -83,7 +83,7 @@ async function seed() {
   }
 
   // ── 3. Company Admin ───────────────────────────────────────────────────────
-  const ADMIN_EMAIL    = process.env.COMPANY_ADMIN_EMAIL    ?? "admin@ironframe.com";
+  const ADMIN_EMAIL    = process.env.COMPANY_ADMIN_EMAIL    ?? "admin@gmail.com";
   const ADMIN_PASSWORD = process.env.COMPANY_ADMIN_PASSWORD ?? "Admin@123456";
 
   let companyAdmin = await userRepo.findOne({ where: { email: ADMIN_EMAIL } });
@@ -107,9 +107,9 @@ async function seed() {
 
   // ── 4. Demo Users (manager, supervisor, worker) ────────────────────────────
   const demoUsers = [
-    { firstName: "Mike",  lastName: "Johnson", email: "manager@ironframe.com",    role: UserRole.MANAGER,    password: "Manager@123" },
-    { firstName: "Sarah", lastName: "Chen",    email: "supervisor@ironframe.com", role: UserRole.SUPERVISOR, password: "Supervisor@123" },
-    { firstName: "Jake",  lastName: "Torres",  email: "worker@ironframe.com",     role: UserRole.WORKER,     password: "Worker@123" },
+    { firstName: "Mike",  lastName: "Johnson", email: "manager@gmail.com",    role: UserRole.MANAGER,    password: "Manager@123" },
+    { firstName: "Sarah", lastName: "Chen",    email: "supervisor@gmail.com", role: UserRole.SUPERVISOR, password: "Supervisor@123" },
+    { firstName: "Jake",  lastName: "Torres",  email: "worker@gmail.com",     role: UserRole.WORKER,     password: "Worker@123" },
   ];
 
   for (const u of demoUsers) {
@@ -148,9 +148,9 @@ async function seed() {
   console.log("├────────────────────────────────────────────────────────┤");
   console.log(`│  SuperAdmin:  ${SA_EMAIL.padEnd(30)} ${SA_PASSWORD.padEnd(10)} │`);
   console.log(`│  CompanyAdmin:${ADMIN_EMAIL.padEnd(30)} Admin@123456  │`);
-  console.log(`│  Manager:     manager@ironframe.com           Manager@123   │`);
-  console.log(`│  Supervisor:  supervisor@ironframe.com        Supervisor@123│`);
-  console.log(`│  Worker:      worker@ironframe.com            Worker@123    │`);
+  console.log(`│  Manager:     manager@gmail.com           Manager@123   │`);
+  console.log(`│  Supervisor:  supervisor@gmail.com        Supervisor@123│`);
+  console.log(`│  Worker:      worker@gmail.com            Worker@123    │`);
   console.log("└────────────────────────────────────────────────────────┘\n");
 
   await AppDataSource.destroy();
