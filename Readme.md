@@ -1,39 +1,167 @@
-# Buildersoft API
+# Buildersoft CMS — Multi-Tenant API v3.0
 
-## Stack
-- **Node.js + TypeScript** — Express 4, TypeORM 0.3, MySQL 2
-- **Auth** — JWT access + refresh tokens, bcrypt, role-based guards
-- **Features** — Roles & Permissions (DB-driven), User Management, Full CRUD for all entities, Invoice PDF, Worker Logs, Dashboard Analytics
+A fully multi-tenant construction management backend. Each company gets complete data isolation — their own projects, clients, workers, invoices, pay periods, and role permissions.
+
+## Architecture Overview
+
+```
+Platform (SuperAdmin)
+└── Company A (Admin + Users)
+│   ├── Clients
+│   ├── Projects → Tasks, WorkerLogs
+│   ├── Workers → InvoicePeriods
+│   └── Invoices → Payments
+└── Company B (Admin + Users)
+    └── ... completely isolated data
+```
 
 ## Quick Start
 
 ```bash
-cp .env.example .env        # configure your env
+# 1. Install deps
 npm install
-npm run dev                 # development (auto-sync schema)
-npm run build && npm start  # production
+
+# 2. Copy env file
+cp .env.example .env
+# Edit .env with your MySQL credentials and secrets
+
+# 3. Create database
+mysql -u root -p -e "CREATE DATABASE buildersoft_multitenant CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+# 4. Start (auto-syncs schema in dev)
+npm run dev
+
+# 5. Seed superadmin + demo company
+npm run seed
 ```
 
-## API Base: `/api`
+## Default Credentials (after seed)
 
-| Area | Routes |
-|------|--------|
-| Auth | `POST /auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `GET/PATCH /auth/profile`, `POST /auth/change-password` |
-| Users (admin) | `GET/POST /users`, `GET/PATCH/DELETE /users/:id`, `PATCH /users/:id/role`, `PATCH /users/:id/toggle-active`, `POST /users/:id/reset-password` |
-| Role Permissions | `GET /role-permissions`, `GET /role-permissions/:role`, `PUT /role-permissions/:role`, `PUT /role-permissions/bulk`, `POST /role-permissions/reset` |
-| Dashboard | `GET /dashboard/overview`, `GET /dashboard/labor` |
-| Clients | Full CRUD + `/stats` |
-| Projects | Full CRUD + `/stats` + worker assignment |
-| Tasks | Full CRUD + progress + worker assignment |
-| Workers | Full CRUD + `/stats` + `/logs` |
-| Invoices | Full CRUD + payments + PDF + mark-sent |
-| Invoice Periods | Full CRUD + `/summary` |
-| Worker Logs | Full CRUD + approve/reject |
+| Role          | Email                       | Password        |
+|---------------|-----------------------------|-----------------|
+| SuperAdmin    | superadmin@buildersoft.io   | SuperAdmin@123  |
+| Company Admin | admin@ironframe.com         | Admin@123456    |
+| Manager       | manager@ironframe.com       | Manager@123     |
+| Supervisor    | supervisor@ironframe.com    | Supervisor@123  |
+| Worker        | worker@ironframe.com        | Worker@123      |
 
-## Roles
-`admin` → full access
-`manager` → all features, no user management
-`supervisor` → projects + tasks
-`worker` → tasks only
+## Multi-Tenancy Design
 
-Permissions are stored in the DB (`role_permissions` table) and can be updated live via the admin portal.
+### Tenant Isolation
+Every resource (Client, Project, Worker, Invoice, etc.) has a `companyId` column. All queries are automatically scoped to the authenticated user's `companyId`. Cross-company access returns 403.
+
+### Roles
+- **superadmin** — Platform-wide. Sees all companies, all data. No companyId.
+- **admin** — Full access within their company.
+- **manager** — Configurable via role permissions.
+- **supervisor** — Configurable via role permissions.
+- **worker** — Configurable via role permissions.
+- **contractor** — Minimum access.
+
+### Role Permissions
+Each company has its own role permission table. Admins can customize which routes each role can access. SuperAdmin can set global defaults.
+
+## API Endpoints
+
+### Auth
+```
+POST   /api/auth/register          Body: { firstName, lastName, email, password, companyId? }
+POST   /api/auth/login             Body: { email, password }
+POST   /api/auth/refresh           Body: { refreshToken }
+POST   /api/auth/logout
+GET    /api/auth/profile
+PATCH  /api/auth/profile
+POST   /api/auth/change-password
+```
+
+### Companies (SuperAdmin + own Company Admin)
+```
+GET    /api/companies              SuperAdmin: all companies
+POST   /api/companies              SuperAdmin: create company + owner
+GET    /api/companies/:id          SuperAdmin or own company admin
+PATCH  /api/companies/:id
+POST   /api/companies/:id/toggle-status   SuperAdmin only
+DELETE /api/companies/:id          SuperAdmin only
+
+GET    /api/companies/:id/users          List users in company
+POST   /api/companies/:id/users          Create user in company
+GET    /api/companies/:id/role-permissions
+PUT    /api/companies/:id/role-permissions
+```
+
+### SuperAdmin Panel
+```
+GET    /api/superadmin/overview           Platform-wide stats
+GET    /api/superadmin/users             All users (with companyId filter)
+POST   /api/superadmin/users             Create superadmin
+PATCH  /api/superadmin/users/:id
+POST   /api/superadmin/users/:id/reset-password
+GET    /api/superadmin/report/company    Revenue + stats per company
+```
+
+### Dashboard (company-scoped)
+```
+GET    /api/dashboard/overview
+GET    /api/dashboard/labor
+```
+
+### Clients / Projects / Workers / Invoices / Tasks / Worker Logs / Invoice Periods
+All standard CRUD — identical to v2 but scoped to authenticated user's company.
+
+## Plan Limits
+
+| Plan       | Max Users | Max Projects | Max Workers |
+|------------|-----------|--------------|-------------|
+| free       | 5         | 10           | 20          |
+| starter    | 15        | 30           | 50          |
+| pro        | 50        | 100          | 200         |
+| enterprise | unlimited | unlimited    | unlimited   |
+
+Limits enforced at creation time. Returns 403 with upgrade message.
+
+## SuperAdmin: Managing a Company
+
+```bash
+# Create a company with an owner
+POST /api/companies
+{
+  "name": "BuildCo Ltd",
+  "email": "info@buildco.com",
+  "plan": "pro",
+  "maxUsers": 25,
+  "ownerFirstName": "John",
+  "ownerLastName": "Smith",
+  "ownerEmail": "john@buildco.com",
+  "ownerPassword": "SecurePass123"
+}
+
+# View platform analytics
+GET /api/superadmin/overview
+
+# Suspend a company
+POST /api/companies/:id/toggle-status
+```
+
+## Company Admin: Managing Users
+
+```bash
+# Add a user to your company
+POST /api/companies/:id/users
+{
+  "firstName": "Jane",
+  "lastName": "Doe",
+  "email": "jane@mycompany.com",
+  "password": "Pass@12345",
+  "role": "supervisor"
+}
+
+# Customize role permissions
+PUT /api/companies/:id/role-permissions
+{
+  "permissions": {
+    "manager":    ["/dashboard", "/clients", "/projects", "/tasks", "/workers", "/invoices"],
+    "supervisor": ["/dashboard", "/projects", "/tasks"],
+    "worker":     ["/dashboard", "/tasks"]
+  }
+}
+```

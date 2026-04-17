@@ -1,18 +1,33 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToMany, OneToMany } from "typeorm";
+import {
+  Entity, PrimaryGeneratedColumn, Column, CreateDateColumn,
+  UpdateDateColumn, ManyToMany, OneToMany, ManyToOne, JoinColumn, Index,
+} from "typeorm";
 import { WorkerLog } from "./WorkerLog.entity";
+import { Company } from "./Company.entity";
 
-export enum WorkerStatus { ACTIVE = "active", INACTIVE = "inactive", ON_LEAVE = "on_leave" }
+export enum WorkerStatus {
+  ACTIVE   = "active",
+  INACTIVE = "inactive",
+  ON_LEAVE = "on_leave",
+}
+
 export enum WorkerRole {
-  WORKER = "worker", FOREMAN = "foreman", SUPERVISOR = "supervisor",
-  ENGINEER = "engineer", MANAGER = "manager", SUBCONTRACTOR = "subcontractor",
+  WORKER       = "worker",
+  FOREMAN      = "foreman",
+  SUPERVISOR   = "supervisor",
+  ENGINEER     = "engineer",
+  MANAGER      = "manager",
+  SUBCONTRACTOR = "subcontractor",
 }
 
 @Entity("workers")
+@Index(["companyId"])
 export class Worker {
   @PrimaryGeneratedColumn("uuid") id!: string;
+  @Column() companyId!: string;
   @Column() firstName!: string;
   @Column() lastName!: string;
-  @Column({ unique: true }) email!: string;
+  @Column() email!: string;
   @Column({ nullable: true }) phone!: string;
   @Column({ type: "enum", enum: WorkerRole, default: WorkerRole.WORKER }) role!: WorkerRole;
   @Column({ type: "enum", enum: WorkerStatus, default: WorkerStatus.ACTIVE }) status!: WorkerStatus;
@@ -24,6 +39,10 @@ export class Worker {
   @Column({ nullable: true }) hiredAt!: Date;
   @CreateDateColumn() createdAt!: Date;
   @UpdateDateColumn() updatedAt!: Date;
+
+  @ManyToOne(() => Company, (c) => c.workers, { onDelete: "CASCADE" })
+  @JoinColumn({ name: "companyId" })
+  companyRef!: Company;
 
   @OneToMany(() => WorkerLog, (l) => l.worker) logs!: WorkerLog[];
 
