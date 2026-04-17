@@ -35,7 +35,7 @@ async function seed() {
   const roleRepo    = AppDataSource.getRepository(RolePermission);
 
   // ── 1. SuperAdmin ──────────────────────────────────────────────────────────
-  const SA_EMAIL    = process.env.SUPERADMIN_EMAIL    ?? "superadmin@gmail.io";
+  const SA_EMAIL    = process.env.SUPERADMIN_EMAIL    ?? "services.shivagyawali@gmail.com";
   const SA_PASSWORD = process.env.SUPERADMIN_PASSWORD ?? "SuperAdmin@123";
 
   let superAdmin = await userRepo.findOne({ where: { email: SA_EMAIL } });
