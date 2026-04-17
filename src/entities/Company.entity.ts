@@ -1,6 +1,11 @@
 import {
-  Entity, PrimaryGeneratedColumn, Column,
-  CreateDateColumn, UpdateDateColumn, OneToMany, BeforeInsert,
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+  BeforeInsert,
 } from "typeorm";
 import { User } from "./User.entity";
 import { Client } from "./Client.entity";
@@ -11,16 +16,16 @@ import { InvoicePeriod } from "./InvoicePeriod.entity";
 import { RolePermission } from "./RolePermission.entity";
 
 export enum CompanyStatus {
-  ACTIVE   = "active",
+  ACTIVE = "active",
   INACTIVE = "inactive",
-  TRIAL    = "trial",
+  TRIAL = "trial",
   SUSPENDED = "suspended",
 }
 
 export enum CompanyPlan {
-  FREE       = "free",
-  STARTER    = "starter",
-  PRO        = "pro",
+  FREE = "free",
+  STARTER = "starter",
+  PRO = "pro",
   ENTERPRISE = "enterprise",
 }
 
@@ -28,7 +33,7 @@ export enum CompanyPlan {
 export class Company {
   @PrimaryGeneratedColumn("uuid") id!: string;
   @Column({ unique: true }) name!: string;
-  @Column({ unique: true }) slug!: string;            // URL-safe identifier
+  @Column({ unique: true }) slug!: string; // URL-safe identifier
   @Column({ nullable: true }) logo!: string;
   @Column({ nullable: true }) email!: string;
   @Column({ nullable: true }) phone!: string;
@@ -54,26 +59,32 @@ export class Company {
   @Column({ nullable: true }) trialEndsAt!: Date;
   @Column({ nullable: true }) subscriptionEndsAt!: Date;
 
-  @Column({ nullable: true }) ownerId!: string;       // admin user of this company
+  @Column({ nullable: true }) ownerId!: string; // admin user of this company
 
   @Column({ type: "json", nullable: true })
-  settings!: Record<string, any>;                     // company-specific config
+  settings!: Record<string, any>; // company-specific config
 
   @CreateDateColumn() createdAt!: Date;
   @UpdateDateColumn() updatedAt!: Date;
 
   @OneToMany(() => User, (u) => u.company) users!: User[];
   @OneToMany(() => Client, (c) => c.company) clients!: Client[];
-  @OneToMany(() => Project, (p) => p.company) projects!: Project[];
-  @OneToMany(() => Worker, (w) => w.company) workers!: Worker[];
-  @OneToMany(() => Invoice, (i) => i.company) invoices!: Invoice[];
-  @OneToMany(() => InvoicePeriod, (ip) => ip.company) invoicePeriods!: InvoicePeriod[];
-  @OneToMany(() => RolePermission, (rp) => rp.company) rolePermissions!: RolePermission[];
+  @OneToMany(() => Project, (p) => p.companyRef) // ← change here
+  projects!: Project[];
+  @OneToMany(() => Worker, (w) => w.companyRef) workers!: Worker[];
+  @OneToMany(() => Invoice, (i) => i.companyRef) invoices!: Invoice[];
+  @OneToMany(() => InvoicePeriod, (ip) => ip.companyRef)
+  invoicePeriods!: InvoicePeriod[];
+  @OneToMany(() => RolePermission, (rp) => rp.company)
+  rolePermissions!: RolePermission[];
 
   @BeforeInsert()
   generateSlug() {
     if (!this.slug && this.name) {
-      this.slug = this.name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+      this.slug = this.name
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "");
     }
   }
 }
